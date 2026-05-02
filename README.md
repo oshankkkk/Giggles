@@ -1,15 +1,6 @@
 # A tiny Ballerina-inspired compiler/interpreter in Go for learning compiler frontend, type checking, IR generation, and interpretation.
 ## (It compiles to IR and interpretes it through Go)
 
-How will this go
-We read the file.
-We build the lexer
-we parse the data
-
-
-
-
-
 ### How this works
 lexer
 → parser
@@ -140,7 +131,9 @@ d:speak()
 ```
 
 
+## What is a lexer
 
+***lexer was just sequentially going through the characters and categorizing them into groups every time it finds a break point (an invalid character, space, operator, etc).***
 
 
 

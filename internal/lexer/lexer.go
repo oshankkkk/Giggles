@@ -1,42 +1,50 @@
-package lexer 
+package lexer
+
 import (
-	"os"
 	"bufio"
 	"fmt"
-	"strings"
+	"os"
+	//"fmt"
+	//"strings"
 )
 func ReadFile(file *os.File){
-	//separators := [4]string{"(", ")", ",", "\""}
-	separators :="()\","
 	scanner := bufio.NewScanner(file)
+	var tokenlist [][]Token
 	for scanner.Scan() {
+		token:=lexer(scanner.Text())
+		tokenlist = append(tokenlist, token)
 
-		lexer(scanner.Text(),separators)
-		// scanner.Text() gives you the line as a string
-		fmt.Println(scanner.Text())
+	fmt.Println(scanner.Text())
 	}
-
-
+	fmt.Println(tokenlist)
 }
 
-func lexer(source string,seperators string){
+//lexer was just sequentially going through the characters and categorizing them into groups every time it finds a break point (an invalid character, space, operator, etc).
+type Token struct{
+	ID int
+	Type string
+	Value rune
 
-// use case statement to look at each string and put them into tokens
-tokens:=[]string{}
-buff:=""
-for _,value:=range source{
-	
-	if strings.Contains(seperators,string(value)){
-		tokens = append(tokens, buff)
-		buff=""
+}
+func lexer(source string)[]Token{
+	var tokenlist []Token
+	for index,value:=range source{
+		switch string(value) {
+		case "(":
+		tokenlist = append(tokenlist, 	Token{Type: "LParam", Value: value,ID: index})
+		case ")":
+			tokenlist = append(tokenlist, Token{Type: "RParan", Value: value, ID: index})
+		case ",":
+			tokenlist=append(tokenlist, Token{Type: "Comma", Value: value,ID: index})
+		case "\"":
+			tokenlist = append(tokenlist, Token{Type: "DQuotation",Value:value, ID: index })
+		case " ":
+			tokenlist = append(tokenlist,Token{Type: "WhiteSpace",Value:value, ID: index })
+//		default:
+//			tokenlist = append(tokenlist, Token{Type: "None",Value:value, ID: index })
+		}	
 	}
-	buff+=string(value)
+	return tokenlist
 }
-fmt.Println("this is buff:",tokens)
-}
-
-
-
-
 
 
