@@ -132,25 +132,71 @@ d:speak()
 
 
 ## What is a lexer
-
 ***lexer was just sequentially going through the characters and categorizing them into groups every time it finds a break point (an invalid character, space, operator, etc).***
 
+## Why a token
 
+- What kind of thing is this?
+- What exact text did it come from?
+- Where was it in the source file?
+- What value does it represent, if any?
 
+## Token we should build
 
+```
+LEFT_PAREN      (
+RIGHT_PAREN     )
+LEFT_BRACE      {
+RIGHT_BRACE     }
+LEFT_BRACKET    [
+RIGHT_BRACKET   ]
+COMMA           ,
+DOT             .
+SEMICOLON       ;
+COLON           :
 
+```
 
+```
+PLUS            +
+MINUS           -
+STAR            *
+SLASH           /
+PERCENT         %
 
+```
 
+```
+EQUAL           =
+EQUAL_EQUAL     ==
+BANG            !
+BANG_EQUAL      !=
+LESS            <
+LESS_EQUAL      <=
+GREATER         >
+GREATER_EQUAL   >=
 
+```
 
+```
+IDENTIFIER      variableName
+NUMBER          123, 3.14
+STRING          "hello"
+```
 
-
-
-
-
-
-
+```
+IF
+ELSE
+WHILE
+FOR
+RETURN
+FUNCTION
+VAR
+TRUE
+FALSE
+NULL
+EOF
+```
 
 
 
