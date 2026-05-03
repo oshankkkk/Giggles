@@ -15,45 +15,44 @@ func ReadFile(file *os.File){
 	for scanner.Scan() {
 		tokens:=lexer(scanner.Text())
 		tokenlist = append(tokenlist, tokens)
-//	fmt.Println(scanner.Text())
+	fmt.Println(scanner.Text())
 	}
 	fmt.Println(tokenlist)
 }
+
 type TokenType string
 
 const (
-	LEFT_PAREN    TokenType = "("
-	RIGHT_PAREN   TokenType = ")"
-	LEFT_BRACE    TokenType = "{"
-	RIGHT_BRACE   TokenType = "}"
-	LEFT_BRACKET  TokenType = "["
-	RIGHT_BRACKET TokenType = "]"
-	COMMA         TokenType = ","
-	DOT           TokenType = "."
-	SEMICOLON     TokenType = ";"
-	COLON         TokenType = ":"
+	LEFT_PAREN    TokenType = "LEFT_PAREN"
+	RIGHT_PAREN   TokenType = "RIGHT_PAREN"
+	LEFT_BRACE    TokenType = "LEFT_BRACE"
+	RIGHT_BRACE   TokenType = "RIGHT_BRACE"
+	LEFT_BRACKET  TokenType = "LEFT_BRACKET"
+	RIGHT_BRACKET TokenType = "RIGHT_BRACKET"
+	COMMA         TokenType = "COMMA"
+	DOT           TokenType = "DOT"
+	SEMICOLON     TokenType = "SEMICOLON"
+	COLON         TokenType = "COLON"
 
-	PLUS    TokenType = "+"
-	MINUS   TokenType = "-"
-	STAR    TokenType = "*"
-	SLASH   TokenType = "/"
-	PERCENT TokenType = "%"
+	PLUS    TokenType = "PLUS"
+	MINUS   TokenType = "MINUS"
+	STAR    TokenType = "STAR"
+	SLASH   TokenType = "SLASH"
+	PERCENT TokenType = "PERCENT"
 
-	EQUAL	TokenType = "="
-	NOT		TokenType = "!"
-	LESS    TokenType = "<"
-	GREATER TokenType = ">"
-	SINGLE_QUOTES TokenType = "'"
-	DOUBLE_QUOTES TokenType = "\""
+	EQUAL         TokenType = "EQUAL"
+	NOT           TokenType = "NOT"
+	LESS          TokenType = "LESS"
+	GREATER       TokenType = "GREATER"
+	SINGLE_QUOTES TokenType = "SINGLE_QUOTES"
+	DOUBLE_QUOTES TokenType = "DOUBLE_QUOTES"
+	STRING TokenType = "STRING"
 
-	EQUAL_EQUAL   TokenType = "=="
-	NOT_EQUAL    TokenType = "!="
-	LESS_EQUAL    TokenType = "<="
-	GREATER_EQUAL TokenType = ">="
-
+	EQUAL_EQUAL   TokenType = "EQUAL_EQUAL"
+	NOT_EQUAL     TokenType = "NOT_EQUAL"
+	LESS_EQUAL    TokenType = "LESS_EQUAL"
+	GREATER_EQUAL TokenType = "GREATER_EQUAL"
 )
-
-
 
 //lexer was just sequentially going through the characters and categorizing them into groups every time it finds a break point (an invalid character, space, operator, etc).
 type Token struct{
@@ -65,41 +64,47 @@ type Token struct{
 
 
 func lexer(source string)[]Token{
-	singleCharTokens := map[string]TokenType{
-		string(LEFT_PAREN):    LEFT_PAREN,
-		string(RIGHT_PAREN):   RIGHT_PAREN,
-		string(LEFT_BRACE):    LEFT_BRACE,
-		string(RIGHT_BRACE):   RIGHT_BRACE,
-		string(LEFT_BRACKET):  LEFT_BRACKET,
-		string(RIGHT_BRACKET): RIGHT_BRACKET,
-		string(COMMA):         COMMA,
-		string(DOT):           DOT,
-		string(SEMICOLON):     SEMICOLON,
-		string(COLON):         COLON,
-		string(PLUS):          PLUS,
-		string(MINUS):         MINUS,
-		string(STAR):          STAR,
-		string(SLASH):         SLASH,
-		string(PERCENT):       PERCENT,
+	
+var singleCharTokens = map[string]TokenType{
+	"(": LEFT_PAREN,
+	")": RIGHT_PAREN,
+	"{": LEFT_BRACE,
+	"}": RIGHT_BRACE,
+	"[": LEFT_BRACKET,
+	"]": RIGHT_BRACKET,
+	",": COMMA,
+	".": DOT,
+	";": SEMICOLON,
+	":": COLON,
 
-		string(GREATER): GREATER,
-		string(LESS): LESS, 
-		string(NOT): NOT,
-		string(EQUAL): EQUAL,
-	}
-	doubleCharTokens:=map[string]TokenType{
-		//string(SINGLE_QUOTES): SINGLE_QUOTES,
-		//string(DOUBLE_QUOTES): DOUBLE_QUOTES,
-		string(EQUAL_EQUAL):EQUAL_EQUAL,
-		string(NOT_EQUAL):NOT_EQUAL,
-		string(LESS_EQUAL):LESS_EQUAL,
-		string(GREATER_EQUAL):GREATER_EQUAL,
-	}
+	"+": PLUS,
+	"-": MINUS,
+	"*": STAR,
+	"/": SLASH,
+	"%": PERCENT,
+
+	">": GREATER,
+	"<": LESS,
+	"!": NOT,
+	"=": EQUAL,
+
+	"'":  SINGLE_QUOTES,
+	"\"": DOUBLE_QUOTES,
+}
+
+
+var doubleCharTokens = map[string]TokenType{
+	"==": EQUAL_EQUAL,
+	"!=": NOT_EQUAL,
+	"<=": LESS_EQUAL,
+	">=": GREATER_EQUAL,
+}
 	var tokenlist []Token
-	cont:=false
+	doubletoken:=false
+	stringtoken:=false
 	for index,value:=range source{
 		character:=string(value)
-		if cont{
+		if doubletoken{
 			newToken:=tokenlist[len(tokenlist)-1].Value+character
 			if tokenType,ok:=doubleCharTokens[newToken];ok{
 			tokenlist[len(tokenlist)-1].Type=tokenType	
@@ -107,17 +112,40 @@ func lexer(source string)[]Token{
 			continue
 			}
 		}
+		if stringtoken{
+
+		}
 		tokenType, ok := singleCharTokens[character] 
 		if ok {
+	if slices.Contains([]TokenType{SINGLE_QUOTES,DOUBLE_QUOTES},tokenType){
+				if !stringtoken{
+					stringtoken=true
+					tokenType = STRING
 			tokenlist = append(tokenlist, Token{
 				Type:  tokenType,
 				Value: character,
 				ID:    index,
 			})
-			if slices.Contains([]string{string(GREATER),string(LESS),string(NOT),string(EQUAL)},character){
-				cont=true
+	
+				}else{stringtoken=false
+					continue
 			}
+			}
+			if !stringtoken{
+			if slices.Contains([]TokenType{GREATER,LESS,NOT,EQUAL},tokenType){
+				doubletoken=true
+			}
+		
+
+			tokenlist = append(tokenlist, Token{
+				Type:  tokenType,
+				Value: character,
+				ID:    index,
+			})
+	
+			
 		}
+	}	
 
 		// if equal sign then if 	
 	}
