@@ -203,8 +203,61 @@ EOF
 
 
 
+	IF     TokenType = "IF"
+	ELSE   TokenType = "ELSE"
+	THEN   TokenType = "THEN"
+	END    TokenType = "END"
+	FUNC   TokenType = "FUNC"
+	LOCAL  TokenType = "LOCAL"
+	RETURN TokenType = "RETURN"
+
+	WHILE TokenType = "WHILE"
+	FOR   TokenType = "FOR"
+	BREAK TokenType = "BREAK"
+	CONTINUE TokenType = "CONTINUE"
+
+	TRUE  TokenType = "TRUE"
+	FALSE TokenType = "FALSE"
+	NIL   TokenType = "NIL"
 
 
+//readIdentifier()
+//readNumber()
+//readString()
+//skipComment()
+//matchNextChar('=')
+
+
+
+	"if":       IF,
+	"else":     ELSE,
+	"then":     THEN,
+	"end":      END,
+	"func":     FUNC,
+	"local":    LOCAL,
+	"return":   RETURN,
+
+	"while":    WHILE,
+	"for":      FOR,
+	"break":    BREAK,
+	"continue": CONTINUE,
+
+	"true":     TRUE,
+	"false":    FALSE,
+	"nil":      NIL,
+
+
+
+
+
+//variables
+	//local and global variables
+//return
+// if then end
+// function end
+// dot operator?
+// other keywords
+// How to read identiers and keywords
 
 
 
