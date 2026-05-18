@@ -198,88 +198,20 @@ NULL
 EOF
 ```
 
+Right now we convert the raw source into another set of strings we call 'tokens'. Its still just lines of text.
+what we want it that
 
+## Expression Grammer
+expression → literal
+            | unary
+            | binary
+            | grouping ;
 
-
-
-
-	IF     TokenType = "IF"
-	ELSE   TokenType = "ELSE"
-	THEN   TokenType = "THEN"
-	END    TokenType = "END"
-	FUNC   TokenType = "FUNC"
-	LOCAL  TokenType = "LOCAL"
-	RETURN TokenType = "RETURN"
-
-	WHILE TokenType = "WHILE"
-	FOR   TokenType = "FOR"
-	BREAK TokenType = "BREAK"
-	CONTINUE TokenType = "CONTINUE"
-
-	TRUE  TokenType = "TRUE"
-	FALSE TokenType = "FALSE"
-	NIL   TokenType = "NIL"
-
-
-//readIdentifier()
-//readNumber()
-//readString()
-//skipComment()
-//matchNextChar('=')
-
-
-
-	"if":       IF,
-	"else":     ELSE,
-	"then":     THEN,
-	"end":      END,
-	"func":     FUNC,
-	"local":    LOCAL,
-	"return":   RETURN,
-
-	"while":    WHILE,
-	"for":      FOR,
-	"break":    BREAK,
-	"continue": CONTINUE,
-
-	"true":     TRUE,
-	"false":    FALSE,
-	"nil":      NIL,
-
-
-
-
-
-//variables
-	//local and global variables
-//return
-// if then end
-// function end
-// dot operator?
-// other keywords
-// How to read identiers and keywords
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+literal → NUMBER | STRING | "true" | "false" | "nil" ;
+grouping → "(" expression ")" ;
+unary → ( "-" | "!" ) expression ;
+binary → expression operator expression ;
+operator → "==" | "!=" | "<" | "<=" | ">" | ">="
+| "+" | "-" | "*" | "/" ;
 
 

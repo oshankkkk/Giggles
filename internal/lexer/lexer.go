@@ -1,13 +1,10 @@
 package lexer
-
+//lexer was just sequentially going through the characters and categorizing them into groups every time it finds a break point (an invalid character, space, operator, etc).
 import (
 	"bufio"
 	"fmt"
 	"os"
 	"slices"
-	//"strings"
-	//"encoding"
-	//"strings"
 )
 func ReadFile(file *os.File){
 	scanner := bufio.NewScanner(file)
@@ -73,15 +70,8 @@ const (
 	NIL   TokenType = "NIL"
 
 )
-//readIdentifier()
-//readNumber()
-//readString()
-//skipComment()
-//matchNextChar('=')
 
 
-
-//lexer was just sequentially going through the characters and categorizing them into groups every time it finds a break point (an invalid character, space, operator, etc).
 type Token struct{
 	ID int
 	Type TokenType 
