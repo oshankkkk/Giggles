@@ -6,7 +6,7 @@ import (
 	"os"
 	"slices"
 )
-func ReadFile(file *os.File){
+func ReadFile(file *os.File)[][]Token{
 	scanner := bufio.NewScanner(file)
 	var tokenlist [][]Token
 	for scanner.Scan() {
@@ -14,7 +14,7 @@ func ReadFile(file *os.File){
 		tokenlist = append(tokenlist, tokens)
 		fmt.Println(scanner.Text())
 	}
-	fmt.Println(tokenlist)
+	return tokenlist
 }
 
 type TokenType string
@@ -68,7 +68,7 @@ const (
 	TRUE  TokenType = "TRUE"
 	FALSE TokenType = "FALSE"
 	NIL   TokenType = "NIL"
-
+	INTEGER TokenType = "1"
 )
 
 

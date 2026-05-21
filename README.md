@@ -214,4 +214,8 @@ binary → expression operator expression ;
 operator → "==" | "!=" | "<" | "<=" | ">" | ">="
 | "+" | "-" | "*" | "/" ;
 
-
+### Grammar so ALU ops
+Literal1, 2, 3, 4, false — raw values
+Grouping(2 * 3) — anything in parentheses
+Binary*, -, <, == — anything with a left and right side
+Unary-1 or !true — one operator, one value
