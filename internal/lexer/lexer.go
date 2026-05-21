@@ -68,9 +68,8 @@ const (
 	TRUE  TokenType = "TRUE"
 	FALSE TokenType = "FALSE"
 	NIL   TokenType = "NIL"
-	INTEGER TokenType = "1"
+	NUMBER TokenType = "NUMBER" 
 )
-
 
 type Token struct{
 	ID int
@@ -106,6 +105,7 @@ func lexer(source string)[]Token{
 		" ": WHITESPACE,
 		"'":  SINGLE_QUOTES,
 		"\"": DOUBLE_QUOTES,
+		
 
 	}
 
@@ -136,22 +136,18 @@ func lexer(source string)[]Token{
 		"nil":      NIL,
 
 	}
-	//Scope highlighting plugin
 	var tokenlist []Token
 	stringtoken:=false
 	newlist:=""
 	for index,value:=range source{
 		character:=string(value)
 		tokenType, singleCharToken:= singleCharTokens[character]
-
 		if !(singleCharToken){
 			newlist+=character
 			continue
 		}
-
 		newstringtoken:=newlist
 		if len(newlist)>1 && !stringtoken{
-
 			newstringtoken=newlist[:len(newlist)-1]}
 
 			//tokenising the seperated
@@ -173,15 +169,12 @@ func lexer(source string)[]Token{
 					Value: newlist,
 					ID:    index,
 				})
-
-
 			}else if tokenType,ok:=keywordTokens[newstringtoken]; ok{
 				tokenlist = append(tokenlist, Token{
 					Type:  tokenType,
 					Value: newlist,
 					ID:    index,
 				})
-
 			}else if stringtoken{
 				continue
 			}else {
@@ -190,7 +183,6 @@ func lexer(source string)[]Token{
 					Value: newlist,
 					ID:    index,
 				})
-
 			}
 
 			//tokenising the seperator
