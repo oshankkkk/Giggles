@@ -6,6 +6,7 @@ import (
 	"os"
 	"slices"
 )
+
 func ReadFile(file *os.File)[][]Token{
 	scanner := bufio.NewScanner(file)
 	var tokenlist [][]Token
@@ -105,8 +106,6 @@ func lexer(source string)[]Token{
 		" ": WHITESPACE,
 		"'":  SINGLE_QUOTES,
 		"\"": DOUBLE_QUOTES,
-		
-
 	}
 
 
@@ -136,21 +135,24 @@ func lexer(source string)[]Token{
 		"nil":      NIL,
 
 	}
+	//if its not a keyword then its a IDENTIFIER (i think)
 	var tokenlist []Token
 	stringtoken:=false
-	newlist:=""
+	buff:=""
 	for index,value:=range source{
 		character:=string(value)
-		tokenType, singleCharToken:= singleCharTokens[character]
-		if !(singleCharToken){
-			newlist+=character
-			continue
-		}
-		newstringtoken:=newlist
-		if len(newlist)>1 && !stringtoken{
-			newstringtoken=newlist[:len(newlist)-1]}
-
+		tokenType, ok:= singleCharTokens[character]
+		if !(ok) && !(index==len(source)-1){
+			// not a word just a letter
+			buff+=character
+			//continue
+		}else{
+		newstringtoken:=buff
+		//removing the character
+		if len(buff)>1 && !stringtoken{
+			newstringtoken=buff[:len(buff)-1]}
 			//tokenising the seperated
+
 			if slices.Contains([]TokenType{SINGLE_QUOTES,DOUBLE_QUOTES},tokenType){
 				if !stringtoken{
 					stringtoken=true
@@ -162,17 +164,16 @@ func lexer(source string)[]Token{
 						ID:    index,
 					})
 				}
-			}else
-			if tokenType,ok:=doubleCharTokens[ newstringtoken];ok{
+			}else if tokenType,ok:=doubleCharTokens[ newstringtoken];ok{
 				tokenlist = append(tokenlist, Token{
 					Type:  tokenType,
-					Value: newlist,
+					Value: buff,
 					ID:    index,
 				})
 			}else if tokenType,ok:=keywordTokens[newstringtoken]; ok{
 				tokenlist = append(tokenlist, Token{
 					Type:  tokenType,
-					Value: newlist,
+					Value: buff,
 					ID:    index,
 				})
 			}else if stringtoken{
@@ -180,20 +181,21 @@ func lexer(source string)[]Token{
 			}else {
 				tokenlist = append(tokenlist, Token{
 					Type: IDENTIFIER,
-					Value: newlist,
+					Value: buff,
 					ID:    index,
 				})
 			}
-
+			if tokenType!=WHITESPACE {
 			//tokenising the seperator
 			tokenlist = append(tokenlist, Token{
 				Type:  tokenType,
 				Value: character,
 				ID:    index,
 			})
-
-			newlist=""
+}
+			buff=""
 		}
+	}
 
 		return tokenlist
 	}

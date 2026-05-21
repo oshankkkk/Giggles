@@ -2,18 +2,19 @@ package main
 
 import (
 	"fmt"
-	//"os"
-	//"lang/internal/lexer"
-	"lang/internal/parser"
+	"os"
+	"lang/internal/lexer"
+	//"lang/internal/parser"
 )
 func main(){
-	//fmt.Println(+2+2)
-	//file,err:=os.Open("../myfile.txt")
-	//if err!=nil{
-	//	fmt.Println(err)
-	//}
-	//tokenlist:=lexer.ReadFile(file)
-	parser.Parser()	
+file,err:=os.Open("myfile.txt")
+if err!=nil{
+	fmt.Println(err)
+}
+	tokenlist:=lexer.ReadFile(file)
+	fmt.Println(tokenlist[0])
+//	parser.Parser()	
+
 	fmt.Println("end of program")
 
 
