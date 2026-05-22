@@ -1,24 +1,6 @@
-# A tiny Ballerina-inspired compiler/interpreter in Go for learning compiler frontend, type checking, IR generation, and interpretation.
-## (It compiles to IR and interpretes it through Go)
+### A tiny Ballerina-inspired compiler/interpreter in Go for learning compiler frontend, type checking, IR generation, and interpretation.
+##### (It compiles to IR and interpretes it through Go)
 
-### How this works
-lexer
-→ parser
-→ AST
-→ symbol table
-→ type checker
-→ tiny IR
-→ interpreter
-
-#### Timeline
-Phase 1: lexer + parser + AST
-Phase 2: symbol table + scopes
-Phase 3: type checker
-Phase 4: tiny IR
-Phase 5: IR interpreter
-Phase 6: records / optional fields / tables
-
-#####  From hydrogen lang tut to: 
 + Go implementation
 + Ballerina-like syntax
 + symbol/type system
@@ -129,77 +111,6 @@ end
 local d = Dog.new("Rex")
 d:speak()
 ```
-
-
-## What is a lexer
-***lexer was just sequentially going through the characters and categorizing them into groups every time it finds a break point (an invalid character, space, operator, etc).***
-
-## Why a token
-
-- What kind of thing is this?
-- What exact text did it come from?
-- Where was it in the source file?
-- What value does it represent, if any?
-
-## Token we should build
-
-```
-LEFT_PAREN      (
-RIGHT_PAREN     )
-LEFT_BRACE      {
-RIGHT_BRACE     }
-LEFT_BRACKET    [
-RIGHT_BRACKET   ]
-COMMA           ,
-DOT             .
-SEMICOLON       ;
-COLON           :
-
-```
-
-```
-PLUS            +
-MINUS           -
-STAR            *
-SLASH           /
-PERCENT         %
-
-```
-
-```
-EQUAL           =
-EQUAL_EQUAL     ==
-BANG            !
-BANG_EQUAL      !=
-LESS            <
-LESS_EQUAL      <=
-GREATER         >
-GREATER_EQUAL   >=
-
-```
-
-```
-IDENTIFIER      variableName
-NUMBER          123, 3.14
-STRING          "hello"
-```
-
-```
-IF
-ELSE
-WHILE
-FOR
-RETURN
-FUNCTION
-VAR
-TRUE
-FALSE
-NULL
-EOF
-```
-
-Right now we convert the raw source into another set of strings we call 'tokens'. Its still just lines of text.
-what we want it that
 
 ## Expression Grammer
 expression → literal
