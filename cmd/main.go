@@ -12,7 +12,7 @@ if err!=nil{
 	fmt.Println(err)
 }
 	tokenlist:=lexer.ReadFile(file)
-	fmt.Println(tokenlist[0])
+	fmt.Println(tokenlist)
 //	parser.Parser()	
 
 	fmt.Println("end of program")

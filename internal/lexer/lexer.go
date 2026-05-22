@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"slices"
 )
 
 func ReadFile(file *os.File)[][]Token{
@@ -77,127 +76,149 @@ type Token struct{
 	Type TokenType 
 	Value string
 }
+var idCounter int
+var singleCharTokens = map[string]TokenType{
+	"(": LEFT_PAREN,
+	")": RIGHT_PAREN,
+	"{": LEFT_BRACE,
+	"}": RIGHT_BRACE,
+	"[": LEFT_BRACKET,
+	"]": RIGHT_BRACKET,
+	",": COMMA,
+	".": DOT,
+	";": SEMICOLON,
+	":": COLON,
 
-func lexer(source string)[]Token{
+	"+": PLUS,
+	"-": MINUS,
+	"*": STAR,
+	"/": SLASH,
+	"%": PERCENT,
 
-	var singleCharTokens = map[string]TokenType{
-		"(": LEFT_PAREN,
-		")": RIGHT_PAREN,
-		"{": LEFT_BRACE,
-		"}": RIGHT_BRACE,
-		"[": LEFT_BRACKET,
-		"]": RIGHT_BRACKET,
-		",": COMMA,
-		".": DOT,
-		";": SEMICOLON,
-		":": COLON,
+	">": GREATER,
+	"<": LESS,
+	"!": NOT,
+	"=": EQUAL,
 
-		"+": PLUS,
-		"-": MINUS,
-		"*": STAR,
-		"/": SLASH,
-		"%": PERCENT,
-
-		">": GREATER,
-		"<": LESS,
-		"!": NOT,
-		"=": EQUAL,
-
-		" ": WHITESPACE,
-		"'":  SINGLE_QUOTES,
-		"\"": DOUBLE_QUOTES,
-	}
-
-
-	var doubleCharTokens = map[string]TokenType{
-		"==": EQUAL_EQUAL,
-		"!=": NOT_EQUAL,
-		"<=": LESS_EQUAL,
-		">=": GREATER_EQUAL,
-
-	}
-	var keywordTokens=map[string]TokenType{
-		"if":       IF,
-		"else":     ELSE,
-		"then":     THEN,
-		"end":      END,
-		"func":     FUNC,
-		"local":    LOCAL,
-		"return":   RETURN,
-
-		"while":    WHILE,
-		"for":      FOR,
-		"break":    BREAK,
-		"continue": CONTINUE,
-
-		"true":     TRUE,
-		"false":    FALSE,
-		"nil":      NIL,
-
-	}
-	//if its not a keyword then its a IDENTIFIER (i think)
-	var tokenlist []Token
-	stringtoken:=false
-	buff:=""
-	for index,value:=range source{
-		character:=string(value)
-		tokenType, ok:= singleCharTokens[character]
-		if !(ok) && !(index==len(source)-1){
-			// not a word just a letter
-			buff+=character
-			//continue
-		}else{
-		newstringtoken:=buff
-		//removing the character
-		if len(buff)>1 && !stringtoken{
-			newstringtoken=buff[:len(buff)-1]}
-			//tokenising the seperated
-
-			if slices.Contains([]TokenType{SINGLE_QUOTES,DOUBLE_QUOTES},tokenType){
-				if !stringtoken{
-					stringtoken=true
-				}else{
-					stringtoken=false
-					tokenlist = append(tokenlist, Token{
-						Type: STRING,
-						Value: newstringtoken,
-						ID:    index,
-					})
-				}
-			}else if tokenType,ok:=doubleCharTokens[ newstringtoken];ok{
-				tokenlist = append(tokenlist, Token{
-					Type:  tokenType,
-					Value: buff,
-					ID:    index,
-				})
-			}else if tokenType,ok:=keywordTokens[newstringtoken]; ok{
-				tokenlist = append(tokenlist, Token{
-					Type:  tokenType,
-					Value: buff,
-					ID:    index,
-				})
-			}else if stringtoken{
-				continue
-			}else {
-				tokenlist = append(tokenlist, Token{
-					Type: IDENTIFIER,
-					Value: buff,
-					ID:    index,
-				})
-			}
-			if tokenType!=WHITESPACE {
-			//tokenising the seperator
-			tokenlist = append(tokenlist, Token{
-				Type:  tokenType,
-				Value: character,
-				ID:    index,
-			})
+	" ": WHITESPACE,
+	"'":  SINGLE_QUOTES,
+	"\"": DOUBLE_QUOTES,
 }
-			buff=""
+
+
+var doubleCharTokens = map[string]TokenType{
+	"==": EQUAL_EQUAL,
+	"!=": NOT_EQUAL,
+	"<=": LESS_EQUAL,
+	">=": GREATER_EQUAL,
+
+}
+var keywordTokens=map[string]TokenType{
+	"if":       IF,
+	"else":     ELSE,
+	"then":     THEN,
+	"end":      END,
+	"func":     FUNC,
+	"local":    LOCAL,
+	"return":   RETURN,
+
+	"while":    WHILE,
+	"for":      FOR,
+	"break":    BREAK,
+	"continue": CONTINUE,
+
+	"true":     TRUE,
+	"false":    FALSE,
+	"nil":      NIL,
+
+}
+
+func lexer(source string)[]Token {
+
+	pointer:=0
+	var tokenlist []Token
+	move := func() {
+		pointer++
+	}
+	current := func() byte {
+		if pointer < len(source) {
+			return source[pointer]
 		}
+		return 0
+	}
+	next := func() byte {
+		if pointer+1 < len(source) {
+			return source[pointer+1]
+		}
+		return 0
 	}
 
-		return tokenlist
-	}
+	for pointer<len(source){
+		char:=source[pointer]		
+
+		//whitespace	
+		if char == ' ' || char == '\t' || char == '\r' || char == '\n' {
+			move()
+			continue
+		}
+
+		// Strings " or '
+		if char == '"' || char == '\'' {
+			quote := char
+			move() // skip opening quote
+			start := pointer
+			for pointer < len(source) && current() != quote {
+				move()
+			}
+			str := source[start:pointer]
+			move() // skip closing quote
+			addToken(STRING, str,&tokenlist)
+			continue
+		}
+		// numbers
+		if isDigit(char) {
+			start := pointer
+			for pointer < len(source) && isDigit(current()) {
+				move()
+			}
+			// Handle decimal
+			if pointer < len(source) && current() == '.' && isDigit(next()) {
+				move() // consume '.'
+				for pointer < len(source) && isDigit(current()) {
+					move()
+				}
+			}
+			addToken(NUMBER, source[start:pointer],&tokenlist)
+			continue
+		}
 
 
+		if pointer+1 < len(source) {
+			two := string(source[pointer : pointer+2])
+			if tt, ok := doubleCharTokens[two]; ok {
+				addToken(tt, two,&tokenlist)
+				move()
+				move()
+				continue
+			}
+		}
+
+		if tt, ok := singleCharTokens[string(char)]; ok {
+			addToken(tt, string(char),&tokenlist)
+			move()
+			continue
+		}
+		move()
+	} 
+	return tokenlist
+}
+
+func addToken(t TokenType, val string,tokenlist *[]Token) {
+	fmt.Println("adding")
+	*tokenlist= append(*tokenlist, Token{ID: idCounter, Type: t, Value: val})
+	idCounter++
+}
+
+func isDigit(c byte) bool {
+	return c >= '0' && c <= '9'
+}
