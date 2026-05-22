@@ -96,6 +96,7 @@ func numgroupparser(tokenList []lexer.Token, pointer *int) (Expression) {
     }
 	*pointer++
 	exp:=addsubparser(tokenList, pointer)
+	*pointer++ // consume RIGHT_PAREN
 	return Groups{nodeName:"bracket",value: exp}
 }
 
