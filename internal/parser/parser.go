@@ -3,88 +3,55 @@ package parser
 import (
 	"lang/internal/lexer"
 	"fmt"
+	"strings"
 )
-func Parser(){
-	//file,err:=os.open("myfile.txt")
-	//if err!=nil{
-	//	fmt.println(err)
-	//	fmt.println("uuy")
-	//}
-
+func Parser(tokenlist [][]lexer.Token){
 //	tokenlist:=lexer.ReadFile(file)
-tokenlist := []lexer.Token{
-    {ID: 0, Type: lexer.NUMBER, Value: "2"},
-    {ID: 1, Type: lexer.PLUS,   Value: "+"},
-    {ID: 2, Type: lexer.NUMBER, Value: "2"},
-    {ID: 3, Type: lexer.STAR,   Value: "*"},
-    {ID: 4, Type: lexer.NUMBER, Value: "3"},
-}
-	//fmt.Println(tokenlist)
-	exp,_:=addsubparser(tokenlist,0)
-	Dw(exp)
+//tokenlist := []lexer.Token{
+//    {ID: 0, Type: lexer.NUMBER, Value: "2"},
+//    {ID: 1, Type: lexer.PLUS,   Value: "+"},
+//    {ID: 2, Type: lexer.NUMBER, Value: "2"},
+//    {ID: 3, Type: lexer.STAR,   Value: "*"},
+//    {ID: 4, Type: lexer.NUMBER, Value: "3"},
+//}
+pointer:=0
+
+//[[{0 LEFT_PAREN (} {1 NUMBER 1} {2 PLUS +} {3 NUMBER 2} {4 PLUS +} {5 NUMBER 3} {6 RIGHT_PAREN )} {7 STAR *} {8 NUMBER 12}] []]
+	exp:=addsubparser(tokenlist[0],&pointer)
+	Pp(exp,0)
 }
 
-func Dw(ex Expression){
-	ex.expression()
-	if _, ok := ex.(Literal); ok {
-		return
-	}
-	if bin, ok := ex.(Binary); ok {
-		Dw(bin.left)
-		Dw(bin.right)
-		return
-	}
-	if grp, ok := ex.(Groups); ok {
-		Dw(grp.value)
-	}
+func Pp(ex Expression, indent int) {
+    pad := strings.Repeat("  ", indent)
+    switch n := ex.(type) {
+    case Literal:
+        fmt.Printf("%sLiteral(%s)\n", pad, n.value.Value)
+    case Binary:
+        fmt.Printf("%sBinary(%s)\n", pad, n.operator)
+        Pp(n.left, indent+1)
+        Pp(n.right, indent+1)
+    case Groups:
+        fmt.Printf("%sGroup\n", pad)
+        Pp(n.value, indent+1)
+    case Unary:
+        fmt.Printf("%sUnary\n", pad)
+        Pp(n.value, indent+1)
+    default:
+        fmt.Printf("%s???\n", pad)
+    }
 }
 
-type Expression interface{
-	expression()
-}
-type Literal struct{
-
-	nodeName string
-	value lexer.Token
-}
-type Groups struct{
-
-	nodeName string
-	value Expression
-}
-type Binary struct{
-	nodeName string
-	left Expression
-	right Expression
-	operator lexer.TokenType
-}
-type Unary struct{
-	value Expression
-}
-func (s Literal) expression(){
-fmt.Println(s.nodeName)
-}
-func (s Groups) expression(){
-
-fmt.Println(s.nodeName)
-}
-func (s Unary) expression(){
-//fmt.Println(s.nodeName)
-}
-func (s Binary) expression(){
-fmt.Println(s.nodeName)}
-
-func addsubparser(tokenlist[]lexer.Token,index int)(Expression,int){
-	left,index:=muldivparser(tokenlist,index)						
+func addsubparser(tokenlist[]lexer.Token,pointer *int)(Expression){
+	left:=muldivparser(tokenlist,pointer)						
 	var exp,right Expression
-	for index<len(tokenlist){
-		char:=tokenlist[index]
+	for *pointer<len(tokenlist){
+		char:=tokenlist[*pointer]
 		if !(char.Type==lexer.PLUS||char.Type==lexer.MINUS){
 			//if equals break
 			break	
 		}
-		index++
-		right,index=muldivparser(tokenlist,index)
+		*pointer++
+		right=muldivparser(tokenlist,pointer)
 		exp=Binary{
 			nodeName: "binary-addsub",
 			left:left,
@@ -93,21 +60,21 @@ func addsubparser(tokenlist[]lexer.Token,index int)(Expression,int){
 		}
 	}
 	if exp == nil {
-		return left, index
+		return left
 	}
-	return exp,index
+	return exp
 }
 
-func muldivparser(tokenlist[]lexer.Token,index int)(Expression,int){
+func muldivparser(tokenlist[]lexer.Token, pointer *int)(Expression){
 	var right,exp Expression
-	left,index:=numgroupparser(tokenlist,index)
-	for index<len(tokenlist){
-		char:=tokenlist[index]
+	left:=numgroupparser(tokenlist,pointer)
+	for *pointer<len(tokenlist){
+		char:=tokenlist[*pointer]
 		if !(char.Type==lexer.STAR|| char.Type==lexer.SLASH){
 			break
 		}
-		index++
-		right,index=numgroupparser(tokenlist,index)
+		*pointer++
+		right =numgroupparser(tokenlist,pointer)
 		exp=Binary{
 			nodeName: "binary-muldiv",
 			left:left,
@@ -116,17 +83,19 @@ func muldivparser(tokenlist[]lexer.Token,index int)(Expression,int){
 		}
 	}
 	if exp == nil {
-		return left, index
+		return left
 	}
-	return exp,index
+	return exp
 
 }
-func numgroupparser(tokenList []lexer.Token, index int) (Expression, int) {
-    char := tokenList[index]
+func numgroupparser(tokenList []lexer.Token, pointer *int) (Expression) {
+    char := tokenList[*pointer]
     if char.Type == lexer.NUMBER{
-		return Literal{nodeName:"lit",value: char}, index+1
+		*pointer++
+		return Literal{nodeName:"lit",value: char} 
     }
-	exp,index:=addsubparser(tokenList, index)
-	return Groups{nodeName:"bracket",value: exp}, index
+	*pointer++
+	exp:=addsubparser(tokenList, pointer)
+	return Groups{nodeName:"bracket",value: exp}
 }
 
