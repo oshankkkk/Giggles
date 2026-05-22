@@ -1,4 +1,10 @@
-### A tiny Ballerina-inspired compiler/interpreter in Go for learning compiler frontend, type checking, IR generation, and interpretation.
+## References:
+https://craftinginterpreters.com/
+https://youtu.be/ENKT0Z3gldE?si=_dIebGGxXJ5CDZFK
+https://youtu.be/MMxMeX5emUA?si=xtlSl7JEcxy8GSme
+https://youtu.be/SToUyjAsaFk?si=ktX25YS_9reX7E05
+
+#### A tiny Ballerina-inspired compiler/interpreter in Go for learning compiler frontend, type checking, IR generation, and interpretation.
 ##### (It compiles to IR and interpretes it through Go)
 
 + Go implementation
@@ -6,7 +12,6 @@
 + symbol/type system
 + IR interpreter instead of assembly
 
-## Crafting interpreters with lux language 
 #### Features
 - numbers
 - strings
@@ -19,10 +24,8 @@
 - methods
 - inheritance
 
-# What we build: lua flavoured lux language
-
 #### Syntax:
-
+##### (lua inspired)
 ```lua
 -- numbers
 local age = 21
