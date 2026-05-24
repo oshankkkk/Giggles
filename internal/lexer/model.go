@@ -32,7 +32,10 @@ const (
 	LESS_EQUAL    TokenType = "LESS_EQUAL"
 	GREATER_EQUAL TokenType = "GREATER_EQUAL"
 	IDENTIFIER TokenType = "IDENTIFIER"
-	WHITESPACE TokenType ="WHITESPACE"
+	WHITESPACE TokenType = "WHITESPACE"
+	EOF        TokenType = "EOF"
+
+	LET    TokenType = "LET"
 
 	IF     TokenType = "IF"
 	ELSE   TokenType = "ELSE"
@@ -105,7 +108,7 @@ var keywordTokens=map[string]TokenType{
 	"func":     FUNC,
 	"local":    LOCAL,
 	"return":   RETURN,
-
+	"let":      LET,
 	"while":    WHILE,
 	"for":      FOR,
 	"break":    BREAK,

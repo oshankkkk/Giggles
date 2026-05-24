@@ -96,8 +96,24 @@ var line int
 			move()
 			continue
 		}
+
+		if isAlpha(char) {
+			start := pointer
+			startCol := column
+			for pointer < len(source) && (isAlpha(current()) || isDigit(current()) || current() == '_') {
+				move()
+			}
+			word := source[start:pointer]
+			if tt, ok := keywordTokens[word]; ok {
+				addToken(tt, word, &tokenlist, line, startCol)
+			} else {
+				addToken(IDENTIFIER, word, &tokenlist, line, startCol)
+			}
+			continue
+		}
+
 		move()
-	} 
+	}
 	return tokenlist
 }
 
@@ -108,4 +124,8 @@ func addToken(t TokenType, val string,tokenlist *[]Token,line int,column int) {
 
 func isDigit(c byte) bool {
 	return c >= '0' && c <= '9'
+}
+
+func isAlpha(c byte) bool {
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'
 }
