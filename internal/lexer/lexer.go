@@ -6,22 +6,24 @@ import (
 	"os"
 )
 
-func ReadFile(file *os.File)[][]Token{
+func ReadFile(file *os.File)[]Token{
 	scanner := bufio.NewScanner(file)
-	var tokenlist [][]Token
+	var tokenlist []Token
 	for scanner.Scan() {
 		tokens:=lexer(scanner.Text())
-		tokenlist = append(tokenlist, tokens)
+		tokenlist = append(tokenlist, tokens...)
 		fmt.Println(scanner.Text())
 	}
 	return tokenlist
 }
 
 func lexer(source string)[]Token {
-
+var column int
+var line int
 	pointer:=0
 	var tokenlist []Token
 	move := func() {
+		column++
 		pointer++
 	}
 	current := func() byte {
@@ -42,6 +44,9 @@ func lexer(source string)[]Token {
 
 		//whitespace	
 		if char == ' ' || char == '\t' || char == '\r' || char == '\n' {
+			if char == '\n'{
+				line++
+			}
 			move()
 			continue
 		}
@@ -56,7 +61,7 @@ func lexer(source string)[]Token {
 			}
 			str := source[start:pointer]
 			move() // skip closing quote
-			addToken(STRING, str,&tokenlist)
+			addToken(STRING, str,&tokenlist,line,column)
 			continue
 		}
 		// numbers
@@ -72,15 +77,14 @@ func lexer(source string)[]Token {
 					move()
 				}
 			}
-			addToken(NUMBER, source[start:pointer],&tokenlist)
+			addToken(NUMBER, source[start:pointer],&tokenlist,line,column)
 			continue
 		}
-
 
 		if pointer+1 < len(source) {
 			two := string(source[pointer : pointer+2])
 			if tt, ok := doubleCharTokens[two]; ok {
-				addToken(tt, two,&tokenlist)
+				addToken(tt, two,&tokenlist,line,column)
 				move()
 				move()
 				continue
@@ -88,7 +92,7 @@ func lexer(source string)[]Token {
 		}
 
 		if tt, ok := singleCharTokens[string(char)]; ok {
-			addToken(tt, string(char),&tokenlist)
+			addToken(tt, string(char),&tokenlist,line,column)
 			move()
 			continue
 		}
@@ -97,9 +101,8 @@ func lexer(source string)[]Token {
 	return tokenlist
 }
 
-func addToken(t TokenType, val string,tokenlist *[]Token) {
-	fmt.Println("adding")
-	*tokenlist= append(*tokenlist, Token{ID: idCounter, Type: t, Value: val})
+func addToken(t TokenType, val string,tokenlist *[]Token,line int,column int) {
+	*tokenlist= append(*tokenlist, Token{ID: idCounter, Type: t, Value: val, Line: line,Column: column})
 	idCounter++
 }
 

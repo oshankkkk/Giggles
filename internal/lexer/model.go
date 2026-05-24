@@ -57,6 +57,8 @@ type Token struct{
 	ID int
 	Type TokenType 
 	Value string
+	Line int
+	Column int
 }
 var idCounter int
 var singleCharTokens = map[string]TokenType{

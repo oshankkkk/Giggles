@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 )
-func Parser(tokenlist [][]lexer.Token){
+func Parser(tokenlist []lexer.Token){
 //	tokenlist:=lexer.ReadFile(file)
 //tokenlist := []lexer.Token{
 //    {ID: 0, Type: lexer.NUMBER, Value: "2"},
@@ -17,10 +17,9 @@ func Parser(tokenlist [][]lexer.Token){
 pointer:=0
 
 //[[{0 LEFT_PAREN (} {1 NUMBER 1} {2 PLUS +} {3 NUMBER 2} {4 PLUS +} {5 NUMBER 3} {6 RIGHT_PAREN )} {7 STAR *} {8 NUMBER 12}] []]
-	exp:=addsubparser(tokenlist[0],&pointer)
+	exp:=addsubparser(tokenlist,&pointer)
 	Pp(exp,0)
 }
-
 func Pp(ex Expression, indent int) {
     pad := strings.Repeat("  ", indent)
     switch n := ex.(type) {
@@ -40,7 +39,7 @@ func Pp(ex Expression, indent int) {
         fmt.Printf("%s???\n", pad)
     }
 }
-
+func programparser(){}
 func addsubparser(tokenlist[]lexer.Token,pointer *int)(Expression){
 	left:=muldivparser(tokenlist,pointer)						
 	var exp,right Expression
@@ -53,10 +52,14 @@ func addsubparser(tokenlist[]lexer.Token,pointer *int)(Expression){
 		*pointer++
 		right=muldivparser(tokenlist,pointer)
 		exp=Binary{
+
 			nodeName: "binary-addsub",
 			left:left,
 			operator:char.Type,
 			right:right,
+			line:char.Line,
+			column:char.Column,
+
 		}
 	}
 	if exp == nil {
@@ -64,6 +67,7 @@ func addsubparser(tokenlist[]lexer.Token,pointer *int)(Expression){
 	}
 	return exp
 }
+
 
 func muldivparser(tokenlist[]lexer.Token, pointer *int)(Expression){
 	var right,exp Expression
@@ -80,6 +84,10 @@ func muldivparser(tokenlist[]lexer.Token, pointer *int)(Expression){
 			left:left,
 			operator:char.Type,
 			right:right,
+			line:char.Line,
+			column:char.Column,
+
+
 		}
 	}
 	if exp == nil {
@@ -92,11 +100,31 @@ func numgroupparser(tokenList []lexer.Token, pointer *int) (Expression) {
     char := tokenList[*pointer]
     if char.Type == lexer.NUMBER{
 		*pointer++
-		return Literal{nodeName:"lit",value: char} 
+		return Literal{nodeName:"lit",value: char,
+			line:char.Line,
+			column:char.Column,
+
+	} 
     }
+	if char.Type ==lexer.NOT{
+		*pointer++
+		exp:=addsubparser(tokenList,pointer)
+		return Unary{nodeName:"not",value:exp,
+			line:char.Line,
+			column:char.Column,
+
+
+	} 
+	}
 	*pointer++
 	exp:=addsubparser(tokenList, pointer)
 	*pointer++ // consume RIGHT_PAREN
-	return Groups{nodeName:"bracket",value: exp}
+	return Groups{nodeName:"bracket",value: exp,
+			line:char.Line,
+			column:char.Column,
+
+
 }
+}
+
 

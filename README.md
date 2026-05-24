@@ -1,8 +1,9 @@
 ## References:
-https://craftinginterpreters.com/
-https://youtu.be/ENKT0Z3gldE?si=_dIebGGxXJ5CDZFK
-https://youtu.be/MMxMeX5emUA?si=xtlSl7JEcxy8GSme
-https://youtu.be/SToUyjAsaFk?si=ktX25YS_9reX7E05
+- https://craftinginterpreters.com/
+- https://dpvipracollege.ac.in/wp-content/uploads/2023/01/Alfred-V.-Aho-Monica-S.-Lam-Ravi-Sethi-Jeffrey-D.-Ullman-Compilers-Principles-Techniques-and-Tools-Pearson_Addison-Wesley-2007.pdf
+- https://youtu.be/ENKT0Z3gldE?si=_dIebGGxXJ5CDZFK
+- https://youtu.be/MMxMeX5emUA?si=xtlSl7JEcxy8GSme
+- https://youtu.be/SToUyjAsaFk?si=ktX25YS_9reX7E05
 
 #### A tiny Ballerina-inspired compiler/interpreter in Go for learning compiler frontend, type checking, IR generation, and interpretation.
 ##### (It compiles to IR and interpretes it through Go)
