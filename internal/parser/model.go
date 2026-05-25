@@ -47,8 +47,9 @@ type Groups struct {
 	column   int
 }
 
-type LetDecl struct {
+type VarDecl struct {
 	nodeName string
+	typedeff string
 	name     lexer.Token
 	value    ASTNode
 	line     int
@@ -67,5 +68,5 @@ func (n Identifier) expression()    {}
 func (n Binary) expression()        {}
 func (n Unary) expression()         {}
 func (n Groups) expression()        {}
-func (n LetDecl) expression()       {}
+func (n VarDecl) expression()       {}
 func (n ExprStatement) expression() {}

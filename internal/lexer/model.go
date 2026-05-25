@@ -35,8 +35,8 @@ const (
 	WHITESPACE TokenType = "WHITESPACE"
 	EOF        TokenType = "EOF"
 
-	LET    TokenType = "LET"
-
+//	LET    TokenType = "LET"
+	TYPEDEFF TokenType = "TYPEDEFF"
 	IF     TokenType = "IF"
 	ELSE   TokenType = "ELSE"
 	THEN   TokenType = "THEN"
@@ -108,14 +108,15 @@ var keywordTokens=map[string]TokenType{
 	"func":     FUNC,
 	"local":    LOCAL,
 	"return":   RETURN,
-	"let":      LET,
+	//"let":      LET,
+	"int": TYPEDEFF,
+	"string": TYPEDEFF,
+	"double": TYPEDEFF,
+	"bool": TYPEDEFF,
 	"while":    WHILE,
 	"for":      FOR,
 	"break":    BREAK,
 	"continue": CONTINUE,
-
-	"true":     TRUE,
-	"false":    FALSE,
 	"nil":      NIL,
 
 }

@@ -22,35 +22,39 @@ func programparser(tokenlist []lexer.Token, pointer *int) ASTNode {
 }
 
 func statementparser(tokenlist []lexer.Token, pointer *int) ASTNode {
-	if tokenlist[*pointer].Type == lexer.LET {
+	char:=tokenlist[*pointer]	
+	if char.Type== lexer.TYPEDEFF{
 		return vardecparser(tokenlist, pointer)
 	}
 	return expstatement(tokenlist, pointer)
 }
 
 func vardecparser(tokenlist []lexer.Token, pointer *int) ASTNode {
-	letTok := tokenlist[*pointer]
-	*pointer++ // consume 'let'
-	
+	typedeff:= tokenlist[*pointer]
+
+	*pointer++ 		
+		
 	if *pointer >= len(tokenlist) || tokenlist[*pointer].Type != lexer.IDENTIFIER {
-		panic(fmt.Sprintf("expected identifier after 'let' at line %d", letTok.Line))
+		panic(fmt.Sprintf("expected identifier after 'let' at line %d",typedeff.Line))
 	}
-	nameTok := tokenlist[*pointer]
-	*pointer++ // consume identifier
+	varname:= tokenlist[*pointer]
+	*pointer++
+	// consume identifier
 
 	if *pointer >= len(tokenlist) || tokenlist[*pointer].Type != lexer.EQUAL {
-		panic(fmt.Sprintf("expected '=' after identifier '%s' at line %d", nameTok.Value, nameTok.Line))
+		panic(fmt.Sprintf("expected '=' after identifier '%s' at line %d", varname.Value, varname.Line))
 	}
 	*pointer++ // consume '='
 
 	val := addsubparser(tokenlist, pointer)
 
-	return LetDecl{
+	return VarDecl{
+		typedeff:typedeff.Value,
 		nodeName: "let-decl",
-		name:     nameTok,
+		name: varname,
 		value:    val,
-		line:     letTok.Line,
-		column:   letTok.Column,
+		line: varname.Line,
+		column:   varname.Column,
 	}
 }
 
@@ -135,7 +139,7 @@ func Pp(ex ASTNode, indent int) {
 		for _, s := range n.statements {
 			Pp(s, indent+1)
 		}
-	case LetDecl:
+	case VarDecl:
 		fmt.Printf("%sLetDecl(%s)\n", pad, n.name.Value)
 		Pp(n.value, indent+1)
 	case ExprStatement:
