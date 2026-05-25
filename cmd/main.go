@@ -8,7 +8,7 @@ import (
 )
 
 func main(){
-file,err:=os.Open("lol.lol")
+file,err:=os.Open("lol.gg")
 if err!=nil{
 	fmt.Println(err)
 }
