@@ -16,6 +16,10 @@ func ReadFile(file *os.File)[]Token{
 	}
 	return tokenlist
 }
+func Readline(source string)[]Token{
+	tokens:=lexer(source)
+	return tokens
+} 
 
 func lexer(source string)[]Token {
 var column int

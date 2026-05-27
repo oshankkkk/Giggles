@@ -5,21 +5,26 @@ import (
 	"os"
 	"lang/internal/lexer"
 	"lang/internal/parser"
+	"lang/internal/repl"
 )
 
 func main(){
-file,err:=os.Open("lol.gg")
-if err!=nil{
-	fmt.Println(err)
+	args:=os.Args[1:]
+	if len(args)>0 {
+		readscript(args[0])
+	}else{
+	repl.Run()
+	}
 }
 
-tokenlist:=lexer.ReadFile(file)
-fmt.Println(tokenlist)
+func readscript(path string){
+	file,err:=os.Open(path)
+	if err!=nil{
+		fmt.Println(err)
+	}
+
+	tokenlist:=lexer.ReadFile(file)
 	parser.Parser(tokenlist)	
 
 	fmt.Println("end of program")
-	
-
 }
-
-
