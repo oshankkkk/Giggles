@@ -13,11 +13,15 @@ var Opcode = map[string]int{
 	"PUSH": 1,
 	"ADD":  2,
 	"SUB":  3,
+	"MUL":4,
+	"DIV":5,
 }
 var OpName = map[int]string{
     1: "PUSH",
     2: "ADD",
     3: "SUB",
+	4: "MUL",
+	5: "DIV",
 }
 func ToBytecode(program []string)([]byte,[]int){
 	var constantTable []int
@@ -40,7 +44,7 @@ func Machine(bytearray []byte, counterTable []int) int {
     var stack = make([]int, 256)
     var stackpointer int
     var programCounter int
-
+	var ans int
     for programCounter < len(bytearray) {
         opcode := int(bytearray[programCounter])
 
@@ -51,18 +55,36 @@ func Machine(bytearray []byte, counterTable []int) int {
             stack[stackpointer] = number
             stackpointer++
             programCounter++
-
         case "ADD":
             stackpointer--
             left := stack[stackpointer]
             stackpointer--
             right := stack[stackpointer]
-            ans := left + right
+            ans = left + right
             stack[stackpointer] = ans
             stackpointer++
             programCounter++
-            return ans
+	  	case "MUL":
+            stackpointer--
+            left := stack[stackpointer]
+            stackpointer--
+            right := stack[stackpointer]
+            ans = left * right
+            stack[stackpointer] = ans
+            stackpointer++
+            programCounter++
+  		case "DIV":
+            stackpointer--
+            left := stack[stackpointer]
+            stackpointer--
+            right := stack[stackpointer]
+            ans = left / right
+            stack[stackpointer] = ans
+            stackpointer++
+            programCounter++
+
+
         }
     }
-    return 0
+    return ans
 }
