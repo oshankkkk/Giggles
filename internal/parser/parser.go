@@ -6,10 +6,11 @@ import (
 	"strings"
 )
 
-func Parser(tokenlist []lexer.Token) {
+func Parser(tokenlist []lexer.Token)ASTNode{
 	pointer := 0
 	prog := programparser(tokenlist, &pointer)
-	Pp(prog, 0)
+	return prog
+	//Pp(prog, 0)
 }
 
 func programparser(tokenlist []lexer.Token, pointer *int) ASTNode {
@@ -18,7 +19,7 @@ func programparser(tokenlist []lexer.Token, pointer *int) ASTNode {
 		stmt := statementparser(tokenlist, pointer)
 		statements = append(statements, stmt)
 	}
-	return Program{statements: statements}
+	return Program{Statements: statements}
 }
 
 func statementparser(tokenlist []lexer.Token, pointer *int) ASTNode {
@@ -35,33 +36,33 @@ func vardecparser(tokenlist []lexer.Token, pointer *int) ASTNode {
 	*pointer++ 		
 		
 	if *pointer >= len(tokenlist) || tokenlist[*pointer].Type != lexer.IDENTIFIER {
-		panic(fmt.Sprintf("expected identifier after 'let' at line %d",typedeff.Line))
+		panic(fmt.Sprintf("expected identifier after 'let' at Line %d",typedeff.Line))
 	}
-	varname:= tokenlist[*pointer]
+	varName:= tokenlist[*pointer]
 	*pointer++
 	// consume identifier
 
 	if *pointer >= len(tokenlist) || tokenlist[*pointer].Type != lexer.EQUAL {
-		panic(fmt.Sprintf("expected '=' after identifier '%s' at line %d", varname.Value, varname.Line))
+		panic(fmt.Sprintf("expected '=' after identifier '%s' at Line %d", varName.Value, varName.Line))
 	}
 	*pointer++ // consume '='
 
 	val := addsubparser(tokenlist, pointer)
 
 	return VarDecl{
-		typedeff:typedeff.Value,
-		nodeName: "let-decl",
-		name: varname,
-		value:    val,
-		line: varname.Line,
-		column:   varname.Column,
+		Typedeff:typedeff.Value,
+		NodeName: "let-decl",
+		Name: varName,
+		Value:    val,
+		Line: varName.Line,
+		Column:   varName.Column,
 	}
 }
 
 func expstatement(tokenlist []lexer.Token, pointer *int) ASTNode {
 	tok := tokenlist[*pointer]
 	expr := addsubparser(tokenlist, pointer)
-	return ExprStatement{expr: expr, line: tok.Line, column: tok.Column}
+	return ExprStatement{Expr: expr, Line: tok.Line, Column: tok.Column}
 }
 
 func addsubparser(tokenlist []lexer.Token, pointer *int) ASTNode {
@@ -74,12 +75,12 @@ func addsubparser(tokenlist []lexer.Token, pointer *int) ASTNode {
 		*pointer++
 		right := muldivparser(tokenlist, pointer)
 		left = Binary{
-			nodeName: "binary-addsub",
-			left:     left,
-			operator: char.Type,
-			right:    right,
-			line:     char.Line,
-			column:   char.Column,
+			NodeName: "binary-addsub",
+			Left:     left,
+			Operator: char.Type,
+			Right:    right,
+			Line:     char.Line,
+			Column:   char.Column,
 		}
 	}
 	return left
@@ -95,12 +96,12 @@ func muldivparser(tokenlist []lexer.Token, pointer *int) ASTNode {
 		*pointer++
 		right := numgroupparser(tokenlist, pointer)
 		left = Binary{
-			nodeName: "binary-muldiv",
-			left:     left,
-			operator: char.Type,
-			right:    right,
-			line:     char.Line,
-			column:   char.Column,
+			NodeName: "binary-muldiv",
+			Left:     left,
+			Operator: char.Type,
+			Right:    right,
+			Line:     char.Line,
+			Column:   char.Column,
 		}
 	}
 	return left
@@ -111,24 +112,24 @@ func numgroupparser(tokenList []lexer.Token, pointer *int) ASTNode {
 
 	if char.Type == lexer.NUMBER {
 		*pointer++
-		return Literal{nodeName: "lit", value: char, line: char.Line, column: char.Column}
+		return Literal{NodeName: "lit", Value: char, Line: char.Line, Column: char.Column}
 	}
 
 	if char.Type == lexer.IDENTIFIER {
 		*pointer++
-		return Identifier{nodeName: "ident", name: char, line: char.Line, column: char.Column}
+		return Identifier{NodeName: "ident", Name: char, Line: char.Line, Column: char.Column}
 	}
 
 	if char.Type == lexer.NOT {
 		*pointer++
 		exp := addsubparser(tokenList, pointer)
-		return Unary{nodeName: "not", value: exp, line: char.Line, column: char.Column}
+		return Unary{NodeName: "not", Value: exp, Line: char.Line, Column: char.Column}
 	}
 
 	*pointer++
 	exp := addsubparser(tokenList, pointer)
-	*pointer++// consume RIGHT_PAREN
-	return Groups{nodeName: "bracket", value: exp, line: char.Line, column: char.Column}
+	*pointer++// consume Right_PAREN
+	return Groups{NodeName: "bracket", Value: exp, Line: char.Line, Column: char.Column}
 }
 
 func Pp(ex ASTNode, indent int) {
@@ -136,29 +137,29 @@ func Pp(ex ASTNode, indent int) {
 	switch n := ex.(type) {
 	case Program:
 		fmt.Printf("%sProgram\n", pad)
-		for _, s := range n.statements {
+		for _, s := range n.Statements {
 			Pp(s, indent+1)
 		}
 	case VarDecl:
-		fmt.Printf("%sLetDecl(%s)\n", pad, n.name.Value)
-		Pp(n.value, indent+1)
+		fmt.Printf("%sLetDecl(%s)\n", pad, n.Name.Value)
+		Pp(n.Value, indent+1)
 	case ExprStatement:
 		fmt.Printf("%sExprStatement\n", pad)
-		Pp(n.expr, indent+1)
+		Pp(n.Expr, indent+1)
 	case Literal:
-		fmt.Printf("%sLiteral(%s)\n", pad, n.value.Value)
+		fmt.Printf("%sLiteral(%s)\n", pad, n.Value.Value)
 	case Identifier:
-		fmt.Printf("%sIdentifier(%s)\n", pad, n.name.Value)
+		fmt.Printf("%sIdentifier(%s)\n", pad, n.Name.Value)
 	case Binary:
-		fmt.Printf("%sBinary(%s)\n", pad, n.operator)
-		Pp(n.left, indent+1)
-		Pp(n.right, indent+1)
+		fmt.Printf("%sBinary(%s)\n", pad, n.Operator)
+		Pp(n.Left, indent+1)
+		Pp(n.Right, indent+1)
 	case Groups:
 		fmt.Printf("%sGroup\n", pad)
-		Pp(n.value, indent+1)
+		Pp(n.Value, indent+1)
 	case Unary:
 		fmt.Printf("%sUnary\n", pad)
-		Pp(n.value, indent+1)
+		Pp(n.Value, indent+1)
 	default:
 		fmt.Printf("%s???\n", pad)
 	}

@@ -3,70 +3,71 @@ package parser
 import "lang/internal/lexer"
 
 type ASTNode interface {
-	expression()
+	Expression()
 }
 
 type Program struct {
-	statements []ASTNode
+	Statements []ASTNode
 }
 
 type Literal struct {
-	nodeName string
-	value    lexer.Token
-	line     int
-	column   int
+	NodeName string
+	Value    lexer.Token
+	Line     int
+	Column   int
 }
 
 type Identifier struct {
-	nodeName string
-	name     lexer.Token
-	line     int
-	column   int
+	NodeName string
+	Name     lexer.Token
+	Line     int
+	Column   int
 }
 
 type Binary struct {
-	nodeName string
-	left     ASTNode
-	right    ASTNode
-	operator lexer.TokenType
-	line     int
-	column   int
+	NodeName string
+	Left     ASTNode
+	Right    ASTNode
+	Operator lexer.TokenType
+	Line     int
+	Column   int
 }
 
 type Unary struct {
-	nodeName string
-	value    ASTNode
-	line     int
-	column   int
+	NodeName string
+	Value    ASTNode
+	Line     int
+	Column   int
 }
 
 type Groups struct {
-	nodeName string
-	value    ASTNode
-	line     int
-	column   int
+	NodeName string
+	Value    ASTNode
+	Line     int
+	Column   int
 }
 
 type VarDecl struct {
-	nodeName string
-	typedeff string
-	name     lexer.Token
-	value    ASTNode
-	line     int
-	column   int
+	NodeName string
+	Typedeff string
+	Name     lexer.Token
+	Value    ASTNode
+	Line     int
+	Column   int
 }
 
 type ExprStatement struct {
-	expr   ASTNode
-	line   int
-	column int
+	Expr   ASTNode
+	Line   int
+	Column int
 }
 
-func (n Program) expression()       {}
-func (n Literal) expression()       {}
-func (n Identifier) expression()    {}
-func (n Binary) expression()        {}
-func (n Unary) expression()         {}
-func (n Groups) expression()        {}
-func (n VarDecl) expression()       {}
-func (n ExprStatement) expression() {}
+func (n Program) Expression()       {}
+func (n Literal) Expression()       {}
+func (n Identifier) Expression()    {}
+func (n Binary) Expression()        {}
+func (n Unary) Expression()         {}
+func (n Groups) Expression()        {}
+func (n VarDecl) Expression()       {}
+func (n ExprStatement) Expression() {}
+

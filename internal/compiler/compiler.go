@@ -1,0 +1,57 @@
+package compiler
+
+import (
+	"fmt"
+	"lang/internal/lexer"
+	"lang/internal/parser"
+
+)
+var bytecode []byte
+func check(err error){
+	if err!=nil{
+		fmt.Println(err)
+	}
+}
+// Binary, literall 
+func Compile(ast parser.ASTNode)[]string{
+	var opcode string
+	list:=[]string{}
+	if value,ok:=ast.(parser.Program);ok{
+		for _,val:=range value.Statements{
+			list = append(list, Compile(val)...)
+		}		
+
+	}
+	if value,ok:=ast.(parser.ExprStatement);ok{
+		list = append(list, Compile(value.Expr)...)
+	}
+
+	if value,ok:=ast.(parser.Groups);ok{
+		list = append(list, Compile(value.Value)...)
+
+	}
+
+	if value,ok:=ast.(parser.Literal);ok{
+		//intvalue,err:=strconv.Atoi(value.Value.Value)
+		//check(err)
+		return append(list,"PUSH",value.Value.Value)
+	}
+	if value,ok:=ast.(parser.Binary);ok{
+	list = append(list, Compile(value.Left)...)
+	list = append(list, Compile(value.Right)...)
+	switch value.Operator{
+	case lexer.PLUS:
+		opcode="ADD"
+	case lexer.MINUS:
+		opcode="SUB"
+	case lexer.SLASH:
+		opcode="DIV"
+	case lexer.STAR:
+		opcode="MUL"
+	}
+	list = append(list, opcode)
+	}
+	return list
+}
+
+

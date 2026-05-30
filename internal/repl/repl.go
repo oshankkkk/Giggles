@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"lang/internal/lexer"
+	"lang/internal/compiler"
 	"lang/internal/parser"
 	
 )
@@ -27,7 +28,8 @@ func Run(){
 			break
 		}
 		tokens:=lexer.Readline(input)
-		parser.Parser(tokens)
-		
+		ast:=parser.Parser(tokens)
+		bytecodelist:=compiler.Compile(ast)
+		fmt.Println(bytecodelist)
 	}
 }
