@@ -8,6 +8,7 @@ import (
 	"lang/internal/lexer"
 	"lang/internal/compiler"
 	"lang/internal/parser"
+	"lang/internal/vm"
 	
 )
 func check(err error){
@@ -23,13 +24,14 @@ func Run(){
 		input, err := reader.ReadString('\n')
 		check(err)
 		input = strings.TrimSpace(input)
-
 		if input == "exit" {
 			break
 		}
 		tokens:=lexer.Readline(input)
 		ast:=parser.Parser(tokens)
 		bytecodelist:=compiler.Compile(ast)
-		fmt.Println(bytecodelist)
+		bytearray,constTable:=vm.ToBytecode(bytecodelist)	
+		ans:=vm.Machine(bytearray,constTable)	
+		fmt.Println(ans)
 	}
 }
