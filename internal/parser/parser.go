@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"lang/internal/lexer"
-	"strings"
 )
 
 func Parser(tokenlist []lexer.Token)ASTNode{
@@ -48,7 +47,7 @@ func vardecparser(tokenlist []lexer.Token, pointer *int) ASTNode {
 	*pointer++ // consume '='
 
 	val := addsubparser(tokenlist, pointer)
-
+	fmt.Println("var is made")
 	return VarDecl{
 		Typedeff:typedeff.Value,
 		NodeName: "let-decl",
@@ -56,6 +55,9 @@ func vardecparser(tokenlist []lexer.Token, pointer *int) ASTNode {
 		Value:    val,
 		Line: varName.Line,
 		Column:   varName.Column,
+		// what happend if we go 
+		//int x=
+		// 3						
 	}
 }
 
@@ -132,35 +134,3 @@ func numgroupparser(tokenList []lexer.Token, pointer *int) ASTNode {
 	return Groups{NodeName: "bracket", Value: exp, Line: char.Line, Column: char.Column}
 }
 
-func Pp(ex ASTNode, indent int) {
-	pad := strings.Repeat("  ", indent)
-	switch n := ex.(type) {
-	case Program:
-		fmt.Printf("%sProgram\n", pad)
-		for _, s := range n.Statements {
-			Pp(s, indent+1)
-		}
-	case VarDecl:
-		fmt.Printf("%sLetDecl(%s)\n", pad, n.Name.Value)
-		Pp(n.Value, indent+1)
-	case ExprStatement:
-		fmt.Printf("%sExprStatement\n", pad)
-		Pp(n.Expr, indent+1)
-	case Literal:
-		fmt.Printf("%sLiteral(%s)\n", pad, n.Value.Value)
-	case Identifier:
-		fmt.Printf("%sIdentifier(%s)\n", pad, n.Name.Value)
-	case Binary:
-		fmt.Printf("%sBinary(%s)\n", pad, n.Operator)
-		Pp(n.Left, indent+1)
-		Pp(n.Right, indent+1)
-	case Groups:
-		fmt.Printf("%sGroup\n", pad)
-		Pp(n.Value, indent+1)
-	case Unary:
-		fmt.Printf("%sUnary\n", pad)
-		Pp(n.Value, indent+1)
-	default:
-		fmt.Printf("%s???\n", pad)
-	}
-}

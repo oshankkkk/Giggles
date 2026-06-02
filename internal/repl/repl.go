@@ -30,8 +30,9 @@ func Run(){
 		tokens:=lexer.Readline(input)
 		ast:=parser.Parser(tokens)
 		bytecodelist:=compiler.Compile(ast)
-		bytearray,constTable:=vm.ToBytecode(bytecodelist)	
-		ans:=vm.Machine(bytearray,constTable)	
+		bytearray,constTable,vartable:=vm.ToBytecode(bytecodelist)	
+		ans:=vm.Machine(bytearray,constTable,vartable)	
 		fmt.Println(ans)
+
 	}
 }
