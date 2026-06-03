@@ -11,6 +11,7 @@ var Opcode = map[string]int{
 	"MUL":4,
 	"DIV":5,
 	"VAR_DEC":6,
+	"VAR":7,
 }
 var OpName = map[int]string{
     1: "PUSH",
@@ -19,6 +20,7 @@ var OpName = map[int]string{
 	4: "MUL",
 	5: "DIV",
 	6:"VAR_DEC",
+	7:"VAR",
 }
 func ToBytecode(program []string)([]byte,[]int,[]string){
 	var constantTable []int
@@ -26,15 +28,11 @@ func ToBytecode(program []string)([]byte,[]int,[]string){
 	var bytearray []byte
 	for _,val:=range program{
 
-			fmt.Println(val,"og val")	
 		if opcode,ok:=Opcode[val];ok{
 			bytearray = append(bytearray, byte(opcode))
-			fmt.Println(val,"opopk")	
 		}else {
-			fmt.Println(val,"valval")	
 			digit,err:=strconv.Atoi(val)
 			if err!=nil{
-			fmt.Println(val,"string")	
 			varConstTable = append(varConstTable, val)	
 			bytearray = append(bytearray, byte(len(varConstTable)-1))
 			continue

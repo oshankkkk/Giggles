@@ -11,16 +11,11 @@ func ToBytecode(program []string)([]byte,[]int,[]string){
 	var varConstTable []string
 	var bytearray []byte
 	for _,val:=range program{
-
-			fmt.Println(val,"og val")	
 		if opcode,ok:=compiler.Opcode[val];ok{
 			bytearray = append(bytearray, byte(opcode))
-			fmt.Println(val,"opopk")	
 		}else {
-			fmt.Println(val,"valval")	
 			digit,err:=strconv.Atoi(val)
 			if err!=nil{
-			fmt.Println(val,"string")	
 			varConstTable = append(varConstTable, val)	
 			bytearray = append(bytearray, byte(len(varConstTable)-1))
 			continue
@@ -29,7 +24,6 @@ func ToBytecode(program []string)([]byte,[]int,[]string){
 			bytearray = append(bytearray, byte(len(constantTable)-1))
 		}
 	}
-	fmt.Println("this worked")
 	return bytearray,constantTable,varConstTable
 }
 
@@ -41,7 +35,7 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string) int {
 	var ans int
     for programCounter < len(bytearray) {
         opcode := int(bytearray[programCounter])
-
+//the var is gone to the heap, but the stack things there is vars to add thats already pushed to trys to get them and gets a index error
         switch compiler.OpName[opcode] {
         case "PUSH":
             programCounter++
@@ -51,14 +45,18 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string) int {
             programCounter++
 		case "VAR_DEC":
 			programCounter++
-			fmt.Println("vardec have")
 			stackpointer--
             globalvar:= varConstTable[int(bytearray[programCounter])]
-			fmt.Println(globalvar)
             heap[globalvar] = stack[stackpointer]
             stackpointer++
             programCounter++
-
+		case "VAR":
+			programCounter++
+			ident:=varConstTable[int(bytearray[programCounter])]
+			value:=heap[ident]
+			stack[stackpointer]=value
+			stackpointer++
+            programCounter++
         case "ADD":
             stackpointer--
             left := stack[stackpointer]

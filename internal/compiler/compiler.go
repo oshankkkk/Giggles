@@ -1,7 +1,6 @@
 package compiler
 
 import (
-	"fmt"
 	"lang/internal/lexer"
 	"lang/internal/parser"
 
@@ -28,32 +27,35 @@ func Compile(ast parser.ASTNode)[]string{
 
 	}
 	if value,ok:=ast.(parser.VarDecl);ok{
-	fmt.Println("here here")
-    	list = append(list, Compile(value.Value)...)
-	  list = append(list, "VAR_DEC",value.Name.Value)
+		list = append(list, Compile(value.Value)...)
+		list = append(list, "VAR_DEC",value.Name.Value)
+
+	}
+	if value,ok:=ast.(parser.Identifier);ok{
+		list = append(list, "VAR",value.Name.Value)
+
 	}
 	if value,ok:=ast.(parser.Literal);ok{
 		//intvalue,err:=strconv.Atoi(value.Value.Value)
 		//check(err)
 
-	fmt.Println("lit here")
 		return append(list,"PUSH",value.Value.Value)
 	}
 
 	if value,ok:=ast.(parser.Binary);ok{
-	list = append(list, Compile(value.Left)...)
-	list = append(list, Compile(value.Right)...)
-	switch value.Operator{
-	case lexer.PLUS:
-		opcode="ADD"
-	case lexer.MINUS:
-		opcode="SUB"
-	case lexer.SLASH:
-		opcode="DIV"
-	case lexer.STAR:
-		opcode="MUL"
-	}
-	list = append(list, opcode)
+		list = append(list, Compile(value.Left)...)
+		list = append(list, Compile(value.Right)...)
+		switch value.Operator{
+		case lexer.PLUS:
+			opcode="ADD"
+		case lexer.MINUS:
+			opcode="SUB"
+		case lexer.SLASH:
+			opcode="DIV"
+		case lexer.STAR:
+			opcode="MUL"
+		}
+		list = append(list, opcode)
 	}
 	return list
 }
