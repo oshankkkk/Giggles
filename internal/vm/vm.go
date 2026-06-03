@@ -27,62 +27,58 @@ func ToBytecode(program []string)([]byte,[]int,[]string){
 	return bytearray,constantTable,varConstTable
 }
 
-func Machine(bytearray []byte, counterTable []int, varConstTable []string) int {
-    var stack = make([]int, 1024)
-    var stackpointer int
+func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack *[]int,stackpointer *int,heap *map[string]int) int {
     var programCounter int
-	var heap=make(map[string]int)
 	var ans int
     for programCounter < len(bytearray) {
         opcode := int(bytearray[programCounter])
-//the var is gone to the heap, but the stack things there is vars to add thats already pushed to trys to get them and gets a index error
         switch compiler.OpName[opcode] {
         case "PUSH":
             programCounter++
             number := counterTable[int(bytearray[programCounter])]
-            stack[stackpointer] = number
-            stackpointer++
+            (*stack)[*stackpointer] = number
+            *stackpointer++
             programCounter++
 		case "VAR_DEC":
 			programCounter++
-			stackpointer--
+			*stackpointer--
             globalvar:= varConstTable[int(bytearray[programCounter])]
-            heap[globalvar] = stack[stackpointer]
-            stackpointer++
+            (*heap)[globalvar] = (*stack)[*stackpointer]
+            *stackpointer++
             programCounter++
 		case "VAR":
 			programCounter++
 			ident:=varConstTable[int(bytearray[programCounter])]
-			value:=heap[ident]
-			stack[stackpointer]=value
-			stackpointer++
+			value:=(*heap)[ident]
+			(*stack)[*stackpointer]=value
+			*stackpointer++
             programCounter++
         case "ADD":
-            stackpointer--
-            left := stack[stackpointer]
-            stackpointer--
-            right := stack[stackpointer]
-            ans = left + right
-            stack[stackpointer] = ans
-            stackpointer++
+            *stackpointer--
+            left := (*stack)[*stackpointer]
+            *stackpointer--
+            right :=  (*stack)[*stackpointer]
+			ans = left + right
+            (*stack)[*stackpointer]= ans
+            *stackpointer++
             programCounter++
 	  	case "MUL":
-            stackpointer--
-            left := stack[stackpointer]
-            stackpointer--
-            right := stack[stackpointer]
+            *stackpointer--
+            left := (*stack)[*stackpointer]
+            *stackpointer--
+            right := (*stack)[*stackpointer]
             ans = left * right
-            stack[stackpointer] = ans
-            stackpointer++
+            (*stack)[*stackpointer] = ans
+            *stackpointer++
             programCounter++
   		case "DIV":
-            stackpointer--
-            left := stack[stackpointer]
-            stackpointer--
-            right := stack[stackpointer]
+            *stackpointer--
+            left := (*stack)[*stackpointer]
+            *stackpointer--
+            right :=(*stack)[*stackpointer]
             ans = left / right
-            stack[stackpointer] = ans
-            stackpointer++
+           (*stack)[*stackpointer]= ans
+            *stackpointer++
             programCounter++
 				
         }

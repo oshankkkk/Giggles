@@ -16,10 +16,10 @@ func check(err error){
 		fmt.Printf("err %s",err)
 	}
 }
-func Run(){
+func Run(stack *[]int,stackpointer *int,heap *map[string]int){
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Interactive Shell (type 'exit' to quit)")
-	for {
+  	for {
 		fmt.Print(">> ")		
 		input, err := reader.ReadString('\n')
 		check(err)
@@ -31,7 +31,7 @@ func Run(){
 		ast:=parser.Parser(tokens)
 		bytecodelist:=compiler.Compile(ast)
 		bytearray,constTable,vartable:=vm.ToBytecode(bytecodelist)	
-		ans:=vm.Machine(bytearray,constTable,vartable)	
+		ans := vm.Machine(bytearray, constTable, vartable, stack, stackpointer, heap)
 		fmt.Println(ans)
 
 	}

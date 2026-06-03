@@ -12,12 +12,18 @@ import (
 
 )
 
-func main(){
+  	var stack = make([]int, 1024)
+    var stackpointer int
+	var heap=make(map[string]int)
+
+
+
+func main(){	
 	args:=os.Args[1:]
 	if len(args)>0 {
 		readscript(args[0])
 	}else{
-	repl.Run()
+ repl.Run(&stack, &stackpointer, &heap)
 	}
 }
 
@@ -31,8 +37,8 @@ func readscript(path string){
 	rootnode:=parser.Parser(tokenlist)	
 	prettyprinter(rootnode,0)
 		bytecodelist:=compiler.Compile(rootnode)
-		bytearray,constTable,vartable:=vm.ToBytecode(bytecodelist)	
-		ans:=vm.Machine(bytearray,constTable,vartable)	
+		bytearray,constTable,vartable:=vm.ToBytecode(bytecodelist)
+		ans:=vm.Machine(bytearray,constTable,vartable,&stack,&stackpointer,&heap)	
 		fmt.Println(ans)
 
 	fmt.Println("end of program")
