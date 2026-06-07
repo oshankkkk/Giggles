@@ -3,7 +3,7 @@ package vm
 import (
 	"fmt"
 	"strconv"
-	"lang/internal/compiler"
+	"lang/internal/backend/compiler"
 )
 
 func ToBytecode(program []string)([]byte,[]int,[]string){

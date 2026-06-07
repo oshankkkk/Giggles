@@ -1,8 +1,8 @@
 package compiler
 
 import (
-	"lang/internal/lexer"
-	"lang/internal/parser"
+	"lang/internal/frontend/lexer"
+	"lang/internal/frontend/parser"
 
 )
 var bytecode []byte

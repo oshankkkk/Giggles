@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"lang/internal/lexer"
-	"lang/internal/parser"
-	"lang/internal/repl"
+	//"os"
+	//"lang/internal/repl"
 	"strings"
-	"lang/internal/compiler"
-	"lang/internal/vm"
-
+	"lang/internal/backend/compiler"
+	"lang/internal/frontend/lexer"
+	"lang/internal/frontend/parser"
+	"lang/internal/backend/vm"
 )
 
   	var stack = make([]int, 1024)
@@ -18,23 +17,23 @@ import (
 
 
 
-func main(){	
-	args:=os.Args[1:]
-	if len(args)>0 {
-		readscript(args[0])
-	}else{
- repl.Run(&stack, &stackpointer, &heap)
-	}
+//func main(){	
+//	args:=os.Args[1:]
+//	if len(args)>0 {
+//		readscript(args[0])
+//	}else{
+//		 repl.Run(&stack, &stackpointer, &heap)
+//	}
+//}
+
+func main(){
+readscript("lol.ggs")
 }
-
 func readscript(path string){
-	file,err:=os.Open(path)
-	if err!=nil{
-		fmt.Println(err)
-	}
-
-	tokenlist:=lexer.ReadFile(file)
-	rootnode:=parser.Parser(tokenlist)	
+	var lexer lexer.Lexer
+	lexer.ReadFile(path)
+	var parser parser.Parser
+	rootnode:=parser.Run(&lexer)	
 	prettyprinter(rootnode,0)
 		bytecodelist:=compiler.Compile(rootnode)
 		bytearray,constTable,vartable:=vm.ToBytecode(bytecodelist)

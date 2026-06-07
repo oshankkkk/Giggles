@@ -32,6 +32,7 @@ const (
 	LESS_EQUAL    TokenType = "LESS_EQUAL"
 	GREATER_EQUAL TokenType = "GREATER_EQUAL"
 	IDENTIFIER TokenType = "IDENTIFIER"
+	ILLEGAL TokenType = "ILLEGAL"
 	WHITESPACE TokenType = "WHITESPACE"
 	EOF        TokenType = "EOF"
 

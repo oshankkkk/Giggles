@@ -5,10 +5,11 @@ import (
 	"bufio"
 	"os"
 	"strings"
-	"lang/internal/lexer"
-	"lang/internal/compiler"
-	"lang/internal/parser"
-	"lang/internal/vm"
+
+	"lang/internal/frontend/parser"
+	"lang/internal/frontend/lexer"
+	"lang/internal/backend/compiler"
+	"lang/internal/backend/vm"
 	
 )
 func check(err error){
