@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	//"os"
-	//"lang/internal/repl"
+	"os"
+	"lang/internal/repl"
 	"strings"
 	"lang/internal/backend/compiler"
 	"lang/internal/frontend/lexer"
@@ -17,18 +17,15 @@ import (
 
 
 
-//func main(){	
-//	args:=os.Args[1:]
-//	if len(args)>0 {
-//		readscript(args[0])
-//	}else{
-//		 repl.Run(&stack, &stackpointer, &heap)
-//	}
-//}
-
-func main(){
-readscript("lol.ggs")
+func main(){	
+	args:=os.Args[1:]
+	if len(args)>0 {
+		readscript(args[0])
+	}else{
+		 repl.Run(&stack, &stackpointer, &heap)
+	}
 }
+
 func readscript(path string){
 	var lexer lexer.Lexer
 	lexer.ReadFile(path)

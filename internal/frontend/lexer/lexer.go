@@ -20,6 +20,9 @@ func (l *Lexer) ReadFile(filename string){
 	}
 	l.source=string(content)
 }
+func (l *Lexer) ReadLine(line string){
+l.source=line
+}
 
 func (l *Lexer) move (){
 		l.column++

@@ -28,8 +28,10 @@ func Run(stack *[]int,stackpointer *int,heap *map[string]int){
 		if input == "exit" {
 			break
 		}
-		tokens:=lexer.Readline(input)
-		ast:=parser.Parser(tokens)
+		var lexer lexer.Lexer
+		lexer.ReadLine(input)
+		var parser parser.Parser
+		ast:=parser.Run(&lexer)
 		bytecodelist:=compiler.Compile(ast)
 		bytearray,constTable,vartable:=vm.ToBytecode(bytecodelist)	
 		ans := vm.Machine(bytearray, constTable, vartable, stack, stackpointer, heap)
