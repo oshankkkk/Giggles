@@ -35,7 +35,7 @@ func readscript(path string){
 	//fumt.Println("yaya")
 		bytecodelist:=compiler.Compile(rootnode)
 
-		bytearray,constTable,vartable:=vm.ToBytecode(bytecodelist)
+		bytearray,constTable,vartable:=compiler.ToBytecode(bytecodelist)
 
 		ans:=vm.Machine(bytearray,constTable,vartable,&stack,&stackpointer,&heap)	
 

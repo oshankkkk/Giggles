@@ -15,11 +15,11 @@ var bpmap = map[lexer.TokenType]int{
 	lexer.PLUS: 10,
 	lexer.STAR:20,
 	lexer.SLASH:20,
-
 }
 
 func (p *Parser) Run(lexer *lexer.Lexer)ASTNode{
-	fmt.Println("DDD")
+
+	fmt.Println(33-100)
 	p.lexer=lexer
 	p.nextToken()
 	prog:=p.programparser()

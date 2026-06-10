@@ -33,7 +33,7 @@ func Run(stack *[]int,stackpointer *int,heap *map[string]int){
 		var parser parser.Parser
 		ast:=parser.Run(&lexer)
 		bytecodelist:=compiler.Compile(ast)
-		bytearray,constTable,vartable:=vm.ToBytecode(bytecodelist)	
+		bytearray,constTable,vartable:=compiler.ToBytecode(bytecodelist)	
 		ans := vm.Machine(bytearray, constTable, vartable, stack, stackpointer, heap)
 		fmt.Println(ans)
 
