@@ -47,7 +47,8 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
             left := (*stack)[*stackpointer]
             *stackpointer--
             right :=  (*stack)[*stackpointer]
-			ans = left - right
+			ans = right - left
+
             (*stack)[*stackpointer]= ans
             *stackpointer++
             programCounter++
