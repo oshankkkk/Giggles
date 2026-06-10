@@ -20,8 +20,9 @@ func (l *Lexer) ReadFile(filename string){
 	}
 	l.source=string(content)
 }
+
 func (l *Lexer) ReadLine(line string){
-l.source=line
+	l.source=line
 }
 
 func (l *Lexer) move (){
@@ -42,7 +43,6 @@ func (l *Lexer)peek() byte {
 	}
 	return 0
 }
-
 
 
 func isDigit(c byte) bool {
@@ -148,6 +148,8 @@ func (l *Lexer) NextToken() Token {
 
 		// double char tokens
 		if l.pointer+1 < len(l.source) {
+
+			fmt.Println("hi")
 			two := l.source[l.pointer : l.pointer+2]
 
 			if tt, ok := doubleCharTokens[two]; ok {

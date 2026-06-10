@@ -6,11 +6,20 @@ import (
 )
 
 type Parser struct {
-pointer int
-current lexer.Token
-lexer *lexer.Lexer
+	pointer int
+	current lexer.Token
+	lexer *lexer.Lexer
 }
+var bpmap = map[lexer.TokenType]int{
+	lexer.MINUS:10,
+	lexer.PLUS: 10,
+	lexer.STAR:20,
+	lexer.SLASH:20,
+
+}
+
 func (p *Parser) Run(lexer *lexer.Lexer)ASTNode{
+	fmt.Println("DDD")
 	p.lexer=lexer
 	p.nextToken()
 	prog:=p.programparser()
@@ -19,15 +28,18 @@ func (p *Parser) Run(lexer *lexer.Lexer)ASTNode{
 
 func (p *Parser)nextToken()lexer.Token{
 	old:=p.current
-p.current=p.lexer.NextToken()
-return old
+	new:=p.lexer.NextToken()
+	p.current=new
+	return old
 }
 
 func (p *Parser)programparser() ASTNode {
-	var statements []ASTNode
-	stmt :=p.statementparser()
-	statements = append(statements, stmt)
-	return Program{Statements: statements}
+var statements []ASTNode
+    for p.current.Type != lexer.EOF { 
+        stmt := p.statementparser()
+        statements = append(statements, stmt)
+    }
+    return Program{Statements: statements}
 }
 
 func (p *Parser)statementparser() ASTNode {
@@ -42,7 +54,7 @@ func (p *Parser)vardecparser() ASTNode{
 
 	typedeff:=p.nextToken()
 	//ok:=lexer.next(*token) 		
-		
+
 	if p.current.Type != lexer.IDENTIFIER {
 		panic(fmt.Sprintf("expected identifier after 'let' at Line %d",typedeff.Line))
 	}
@@ -55,11 +67,10 @@ func (p *Parser)vardecparser() ASTNode{
 		panic(fmt.Sprintf("expected '=' after identifier '%s' at Line %d", varName.Value, varName.Line))
 	}
 
-
 	p.nextToken()
 	// consume '='
 
-	val := p.addsubparser()
+	val := p.parser(0)
 	fmt.Println("var is made")
 	return VarDecl{
 		Typedeff:typedeff.Value,
@@ -75,71 +86,93 @@ func (p *Parser)vardecparser() ASTNode{
 }
 
 func (p *Parser)expstatement() ASTNode {
-	expr := p.addsubparser()
+	expr := p.parser(0)
+	
 	return ExprStatement{Expr: expr, Line: p.current.Line, Column: p.current.Column}
 }
 
-func (p *Parser)addsubparser() ASTNode {
-	left := p.muldivparser()
-	if p.current.Type == lexer.PLUS || p.current.Type == lexer.MINUS {
-	op:=p.current.Type
-	p.nextToken()
-		right := p.muldivparser()
-		left = Binary{
-			NodeName: "binary-addsub",
-			Left:     left,
-			Operator: op,
-			Right:    right,
-			Line:     p.current.Line,
-			Column:  p.current.Column,
-		}
-	}
-	
-	return left
-}
 
-func (p *Parser)muldivparser() ASTNode {
-	left := p.numgroupparser()
+func (p *Parser) parseStart() ASTNode {
 
-		if p.current.Type == lexer.STAR || p.current.Type == lexer.SLASH {
-		op:=p.current.Type
-		p.nextToken()
-		right := p.numgroupparser()
-		left = Binary{
-			NodeName: "binary-muldiv",
-			Left:     left,
-			Operator: op,
-			Right:    right,
-			Line: p.current.Line,
-			Column:   p.current.Column,
-		}
-	}
-	return left
-}
-
-func (p *Parser) numgroupparser() ASTNode {
 	if p.current.Type == lexer.NUMBER {
-		old:=p.nextToken()
-		return Literal{NodeName: "lit", Value: old, Line: old.Line, Column: old.Column}
+		node := Literal{
+			NodeName: "lit",
+			Value: p.current,
+			Line: p.current.Line,
+			Column: p.current.Column,
+		}
+		p.nextToken()
+		return node
 	}
 
-	if p.current.Type  == lexer.IDENTIFIER {
-
-		old:=p.nextToken()
-		return Identifier{NodeName: "ident", Name: old, Line: old.Line, Column: old.Column}
+	if p.current.Type == lexer.IDENTIFIER {
+		node := Identifier{
+			NodeName: "ident",
+			Name: p.current,
+			Line: p.current.Line,
+			Column: p.current.Column,
+		}
+		p.nextToken()
+		return node
 	}
 
 	if p.current.Type == lexer.NOT {
+		token := p.nextToken()
 
-		old:=p.nextToken()
-		exp := p.addsubparser()
-		return Unary{NodeName: "not", Value: exp, Line: old.Line, Column: old.Column}
+
+		return Unary{
+			NodeName: "not",
+			Value: p.parser(30),
+			Line: token.Line,
+			Column: token.Column,
+		}
 	}
 
+	if p.current.Type == lexer.LEFT_PAREN{
+		token := p.nextToken()
+		inner:=p.parser(0)
+		if p.current.Type==lexer.RIGHT_PAREN{
+		p.nextToken()
+	}
 
-	p.nextToken()
-	exp := p.addsubparser()
-	old:=p.nextToken()
-	return Groups{NodeName: "bracket", Value: exp, Line: old.Line, Column: old.Column}
+		return Groups{
+			NodeName: "bracket",
+			Value: inner,
+			Line: token.Line,
+			Column: token.Column,
+		}
+
+	}
+	fmt.Println(p.current.Type)
+//	panic("unexpected token")
+return Binary{}
 }
 
+func (p *Parser) parser(minBp int) ASTNode {
+	node := p.parseStart()
+
+	for {
+		value, ok := bpmap[p.current.Type]
+		if ok && value >minBp {
+
+			op := p.current
+			p.nextToken()
+
+			right := p.parser(value+1)
+
+			node = Binary{
+				NodeName: "binary",
+				Left: node,
+				Operator: op.Type,
+				Right: right,
+				Line: op.Line,
+				Column: op.Column,
+			}
+		}else{
+			break
+		}
+
+	}
+
+	return node
+}

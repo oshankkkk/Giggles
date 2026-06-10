@@ -83,6 +83,9 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 				
         }
     }
+
+
 	fmt.Println(heap)
+	fmt.Println(stack)
     return ans
 }
