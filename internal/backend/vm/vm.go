@@ -6,7 +6,6 @@ import (
 	"lang/internal/backend/compiler"
 )
 
-
 func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack *[]int,stackpointer *int,heap *map[string]int) int {
     var programCounter int
 	var ans int
@@ -17,6 +16,14 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
             programCounter++
             number := counterTable[int(bytearray[programCounter])]
             (*stack)[*stackpointer] = number
+            *stackpointer++
+            programCounter++
+		 case "TRUE":
+            (*stack)[*stackpointer] = toInt(true)
+            *stackpointer++
+            programCounter++
+		 case "FALSE":
+            (*stack)[*stackpointer] = toInt(false)
             *stackpointer++
             programCounter++
 		case "VAR_DEC":
@@ -48,11 +55,9 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
             *stackpointer--
             right :=  (*stack)[*stackpointer]
 			ans = right - left
-
             (*stack)[*stackpointer]= ans
             *stackpointer++
             programCounter++
-
 	  	case "MUL":
             *stackpointer--
             left := (*stack)[*stackpointer]
@@ -71,12 +76,41 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
            (*stack)[*stackpointer]= ans
             *stackpointer++
             programCounter++
-				
+		case "AND":
+            *stackpointer--
+            left := (*stack)[*stackpointer]
+            *stackpointer--
+            right :=(*stack)[*stackpointer]
+            ans = toInt(toBool(right) && toBool(left))
+           (*stack)[*stackpointer]= ans
+            *stackpointer++
+            programCounter++
+		case "OR":
+            *stackpointer--
+            left := (*stack)[*stackpointer]
+            *stackpointer--
+            right :=(*stack)[*stackpointer]
+            ans = toInt(toBool(right) || toBool(left))
+           (*stack)[*stackpointer]= ans
+            *stackpointer++
+            programCounter++
+
         }
     }
-
 
 	fmt.Println(heap)
 	fmt.Println(stack)
     return ans
+}
+func toBool(val int)bool{
+	if val!=0{
+		return true
+	}
+return false
+}
+func toInt(val bool)int{
+	if val{
+		return 1
+	}
+	return 0
 }

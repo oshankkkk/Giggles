@@ -3,10 +3,8 @@ package compiler
 import (
 	"lang/internal/frontend/lexer"
 	"lang/internal/frontend/parser"
-
 )
 var bytecode []byte
-
 
 // Binary, literall 
 func Compile(ast parser.ASTNode)[]string{
@@ -38,6 +36,12 @@ func Compile(ast parser.ASTNode)[]string{
 	if value,ok:=ast.(parser.Literal);ok{
 		//intvalue,err:=strconv.Atoi(value.Value.Value)
 		//check(err)
+		if value.Value.Type== lexer.TRUE{
+
+			return append(list,"TRUE")
+		}else if value.Value.Type== lexer.FALSE{
+			return append(list,"FALSE")
+		}
 
 		return append(list,"PUSH",value.Value.Value)
 	}
@@ -54,6 +58,14 @@ func Compile(ast parser.ASTNode)[]string{
 			opcode="DIV"
 		case lexer.STAR:
 			opcode="MUL"
+		case lexer.AND:
+			opcode="AND"
+		case lexer.OR:
+			opcode="OR"
+	case lexer.TRUE:
+			opcode="TRUE"
+	case lexer.FALSE:
+			opcode="FALSE"
 		}
 		list = append(list, opcode)
 	}

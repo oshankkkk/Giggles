@@ -1,6 +1,6 @@
 package compiler
 import (
-	"fmt"
+//	"fmt"
 	"strconv"
 
 )
@@ -12,6 +12,10 @@ var Opcode = map[string]int{
 	"DIV":5,
 	"VAR_DEC":6,
 	"VAR":7,
+	"AND":8,
+	"OR":9,
+	"TRUE":10,
+	"FALSE":11,
 }
 var OpName = map[int]string{
     1: "PUSH",
@@ -21,6 +25,10 @@ var OpName = map[int]string{
 	5: "DIV",
 	6:"VAR_DEC",
 	7:"VAR",
+	8:"AND",
+	9:"OR",
+	10:"TRUE",
+	11:"FALSE",
 }
 func ToBytecode(program []string)([]byte,[]int,[]string){
 	var constantTable []int
@@ -41,6 +49,5 @@ func ToBytecode(program []string)([]byte,[]int,[]string){
 			bytearray = append(bytearray, byte(len(constantTable)-1))
 		}
 	}
-	fmt.Println("this worked")
 	return bytearray,constantTable,varConstTable
 }

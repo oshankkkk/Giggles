@@ -74,7 +74,6 @@ func (p *Parser)vardecparser() ASTNode{
 	fmt.Println("var is made")
 	return VarDecl{
 		Typedeff:typedeff.Value,
-		NodeName: "let-decl",
 		Name: varName,
 		Value:    val,
 		Line: varName.Line,
@@ -94,9 +93,8 @@ func (p *Parser)expstatement() ASTNode {
 
 func (p *Parser) parseStart() ASTNode {
 
-	if p.current.Type == lexer.NUMBER {
+	if p.current.Type == lexer.NUMBER ||  p.current.Type == lexer.TRUE || p.current.Type== lexer.FALSE{
 		node := Literal{
-			NodeName: "lit",
 			Value: p.current,
 			Line: p.current.Line,
 			Column: p.current.Column,
@@ -107,7 +105,6 @@ func (p *Parser) parseStart() ASTNode {
 
 	if p.current.Type == lexer.IDENTIFIER {
 		node := Identifier{
-			NodeName: "ident",
 			Name: p.current,
 			Line: p.current.Line,
 			Column: p.current.Column,
@@ -116,12 +113,12 @@ func (p *Parser) parseStart() ASTNode {
 		return node
 	}
 
+
 	if p.current.Type == lexer.NOT {
 		token := p.nextToken()
 
 
 		return Unary{
-			NodeName: "not",
 			Value: p.parser(30),
 			Line: token.Line,
 			Column: token.Column,
@@ -132,19 +129,35 @@ func (p *Parser) parseStart() ASTNode {
 		token := p.nextToken()
 		inner:=p.parser(0)
 		if p.current.Type==lexer.RIGHT_PAREN{
-		p.nextToken()
-	}
+			p.nextToken()
+		}	
 
 		return Groups{
-			NodeName: "bracket",
 			Value: inner,
 			Line: token.Line,
 			Column: token.Column,
 		}
 
 	}
-	fmt.Println(p.current.Type)
-//	panic("unexpected token")
+
+	//if p.current.Type==lexer.IF{
+	//	token:=p.nextToken()
+	//	return Condition{
+	//		Value: p.parser(0),
+	//		Line: token.Line,
+	//		Column: token.Column,
+	//	}
+	//}
+	//if p.current.Type==lexer.FOR{
+	//	token:=p.nextToken()
+	//	return Loop{
+	//		Value: p.parser(0),
+	//		Line: token.Line,
+	//		Column: token.Column,
+	//	}
+	//}
+
+//this idk
 return Binary{}
 }
 
@@ -159,9 +172,7 @@ func (p *Parser) parser(minBp int) ASTNode {
 			p.nextToken()
 
 			right := p.parser(value+1)
-
 			node = Binary{
-				NodeName: "binary",
 				Left: node,
 				Operator: op.Type,
 				Right: right,

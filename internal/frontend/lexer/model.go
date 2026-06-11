@@ -55,8 +55,9 @@ const (
 	FALSE TokenType = "FALSE"
 	NIL   TokenType = "NIL"
 	NUMBER TokenType = "NUMBER" 
+	AND TokenType = "AND"
+	OR TokenType = "OR"
 )
-
 type Token struct{
 	ID int
 	Type TokenType 
@@ -99,6 +100,8 @@ var doubleCharTokens = map[string]TokenType{
 	"!=": NOT_EQUAL,
 	"<=": LESS_EQUAL,
 	">=": GREATER_EQUAL,
+	"&&": AND,
+	"||":OR,
 
 }
 var keywordTokens=map[string]TokenType{
@@ -119,6 +122,8 @@ var keywordTokens=map[string]TokenType{
 	"break":    BREAK,
 	"continue": CONTINUE,
 	"nil":      NIL,
+	"true": TRUE,
+	"false":FALSE,
 
 }
 
