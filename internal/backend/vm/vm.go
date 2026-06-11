@@ -2,7 +2,6 @@ package vm
 
 import (
 	"fmt"
-//	"strconv"
 	"lang/internal/backend/compiler"
 )
 
@@ -63,7 +62,7 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
             left := (*stack)[*stackpointer]
             *stackpointer--
             right := (*stack)[*stackpointer]
-            ans = left * right
+            ans = right*left
             (*stack)[*stackpointer] = ans
             *stackpointer++
             programCounter++
@@ -94,8 +93,62 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
            (*stack)[*stackpointer]= ans
             *stackpointer++
             programCounter++
-
-        }
+		case "GT":
+			*stackpointer--
+			left := (*stack)[*stackpointer]
+			*stackpointer--
+			right := (*stack)[*stackpointer]
+			ans = toInt(right > left)
+			(*stack)[*stackpointer] = ans
+			*stackpointer++
+            programCounter++
+		case "LT":
+			*stackpointer--
+			left := (*stack)[*stackpointer]
+			*stackpointer--
+			right := (*stack)[*stackpointer]
+			ans = toInt(right < left)
+			(*stack)[*stackpointer] = ans
+			*stackpointer++
+            programCounter++
+		case "GTE":
+			*stackpointer--
+			left := (*stack)[*stackpointer]
+			*stackpointer--
+			right := (*stack)[*stackpointer]
+			ans = toInt(right >= left)
+			(*stack)[*stackpointer] = ans
+			*stackpointer++
+            programCounter++
+		case "LTE":
+			*stackpointer--
+			left := (*stack)[*stackpointer]
+			*stackpointer--
+			right := (*stack)[*stackpointer]
+			ans = toInt(right <= left)
+			(*stack)[*stackpointer] = ans
+			*stackpointer++
+            programCounter++
+		case "EQ":
+			*stackpointer--
+			left := (*stack)[*stackpointer]
+			*stackpointer--
+			right := (*stack)[*stackpointer]
+			ans = toInt(right == left)
+			(*stack)[*stackpointer] = ans
+			*stackpointer++
+            programCounter++
+			fmt.Println("yaya2")
+		case "NEQ":
+			*stackpointer--
+			left := (*stack)[*stackpointer]
+			*stackpointer--
+			right := (*stack)[*stackpointer]
+			ans = toInt(right != left)
+			(*stack)[*stackpointer] = ans
+			*stackpointer++
+			programCounter++
+		}
     }
 
 	fmt.Println(heap)

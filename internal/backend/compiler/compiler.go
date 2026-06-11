@@ -49,24 +49,33 @@ func Compile(ast parser.ASTNode)[]string{
 	if value,ok:=ast.(parser.Binary);ok{
 		list = append(list, Compile(value.Left)...)
 		list = append(list, Compile(value.Right)...)
-		switch value.Operator{
+		switch value.Operator {
 		case lexer.PLUS:
-			opcode="ADD"
+			opcode = "ADD"
 		case lexer.MINUS:
-			opcode="SUB"
+			opcode = "SUB"
 		case lexer.SLASH:
-			opcode="DIV"
+			opcode = "DIV"
 		case lexer.STAR:
-			opcode="MUL"
+			opcode = "MUL"
 		case lexer.AND:
-			opcode="AND"
+			opcode = "AND"
 		case lexer.OR:
-			opcode="OR"
-	case lexer.TRUE:
-			opcode="TRUE"
-	case lexer.FALSE:
-			opcode="FALSE"
-		}
+			opcode = "OR"
+		case lexer.GREATER:
+			opcode = "GT"
+		case lexer.LESS:
+			opcode = "LT"
+		case lexer.GREATER_EQUAL:
+			opcode = "GTE"
+		case lexer.LESS_EQUAL:
+			opcode = "LTE"
+		case lexer.EQUAL_EQUAL:
+			opcode = "EQ"
+		case lexer.NOT_EQUAL:
+			opcode = "NEQ"
+		}		
+
 		list = append(list, opcode)
 	}
 	return list

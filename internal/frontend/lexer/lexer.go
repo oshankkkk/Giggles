@@ -69,20 +69,6 @@ func (l *Lexer) NextToken() Token {
 			continue
 		}
 
-		// single char tokens
-		if tt, ok := singleCharTokens[string(char)]; ok {
-			tok := Token{
-				ID:    l.idCounter,
-				Type:  tt,
-				Value: string(char),
-				Line:  l.line,
-				Column: l.column,
-			}
-			l.idCounter++
-			l.move()
-			return tok
-		}
-
 		// strings
 		if char == '"' || char == '\'' {
 			quote := char
@@ -169,6 +155,21 @@ func (l *Lexer) NextToken() Token {
 				return tok
 			}
 		}
+		// single char tokens
+		if tt, ok := singleCharTokens[string(char)]; ok {
+			tok := Token{
+				ID:    l.idCounter,
+				Type:  tt,
+				Value: string(char),
+				Line:  l.line,
+				Column: l.column,
+			}
+			l.idCounter++
+			l.move()
+			return tok
+		}
+
+
 
 		// identifiers / keywords
 		if isAlpha(char) {

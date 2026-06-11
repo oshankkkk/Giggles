@@ -11,15 +11,27 @@ type Parser struct {
 	lexer *lexer.Lexer
 }
 var bpmap = map[lexer.TokenType]int{
-	lexer.MINUS:10,
-	lexer.PLUS: 10,
-	lexer.STAR:20,
-	lexer.SLASH:20,
+
+	lexer.STAR: 50,
+	lexer.SLASH: 50,
+
+	lexer.PLUS: 40,
+	lexer.MINUS: 40,
+
+	lexer.GREATER: 30,
+	lexer.LESS: 30,
+	lexer.GREATER_EQUAL: 30,
+	lexer.LESS_EQUAL: 30,
+
+	lexer.EQUAL_EQUAL: 20,
+	lexer.NOT_EQUAL: 20,
+
+	lexer.AND: 10,
+	lexer.OR:  5,
 }
 
 func (p *Parser) Run(lexer *lexer.Lexer)ASTNode{
 
-	fmt.Println(33-100)
 	p.lexer=lexer
 	p.nextToken()
 	prog:=p.programparser()
@@ -34,12 +46,12 @@ func (p *Parser)nextToken()lexer.Token{
 }
 
 func (p *Parser)programparser() ASTNode {
-var statements []ASTNode
-    for p.current.Type != lexer.EOF { 
-        stmt := p.statementparser()
-        statements = append(statements, stmt)
-    }
-    return Program{Statements: statements}
+	var statements []ASTNode
+	for p.current.Type != lexer.EOF { 
+		stmt := p.statementparser()
+		statements = append(statements, stmt)
+	}
+	return Program{Statements: statements}
 }
 
 func (p *Parser)statementparser() ASTNode {
@@ -60,7 +72,6 @@ func (p *Parser)vardecparser() ASTNode{
 	}
 
 	varName:=p.nextToken()
-
 	// consume identifier
 
 	if p.current.Type != lexer.EQUAL {
@@ -86,7 +97,7 @@ func (p *Parser)vardecparser() ASTNode{
 
 func (p *Parser)expstatement() ASTNode {
 	expr := p.parser(0)
-	
+
 	return ExprStatement{Expr: expr, Line: p.current.Line, Column: p.current.Column}
 }
 
@@ -112,11 +123,9 @@ func (p *Parser) parseStart() ASTNode {
 		p.nextToken()
 		return node
 	}
-
-
+	
 	if p.current.Type == lexer.NOT {
 		token := p.nextToken()
-
 
 		return Unary{
 			Value: p.parser(30),
@@ -137,7 +146,6 @@ func (p *Parser) parseStart() ASTNode {
 			Line: token.Line,
 			Column: token.Column,
 		}
-
 	}
 
 	//if p.current.Type==lexer.IF{
@@ -148,6 +156,7 @@ func (p *Parser) parseStart() ASTNode {
 	//		Column: token.Column,
 	//	}
 	//}
+
 	//if p.current.Type==lexer.FOR{
 	//	token:=p.nextToken()
 	//	return Loop{
@@ -157,8 +166,8 @@ func (p *Parser) parseStart() ASTNode {
 	//	}
 	//}
 
-//this idk
-return Binary{}
+	//this idk
+	return Binary{}
 }
 
 func (p *Parser) parser(minBp int) ASTNode {
