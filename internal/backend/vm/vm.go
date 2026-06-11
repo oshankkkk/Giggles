@@ -30,7 +30,7 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 			*stackpointer--
             globalvar:= varConstTable[int(bytearray[programCounter])]
             (*heap)[globalvar] = (*stack)[*stackpointer]
-//            *stackpointer++
+            *stackpointer++
             programCounter++
 		case "VAR":
 			programCounter++
@@ -138,7 +138,6 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 			(*stack)[*stackpointer] = ans
 			*stackpointer++
             programCounter++
-			fmt.Println("yaya2")
 		case "NEQ":
 			*stackpointer--
 			left := (*stack)[*stackpointer]
@@ -148,6 +147,21 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 			(*stack)[*stackpointer] = ans
 			*stackpointer++
 			programCounter++
+		case "JMP":
+			programCounter++
+			address:=int(bytearray[programCounter])
+			programCounter=address
+		case "JIF":
+			programCounter++
+			*stackpointer--
+			if toBool((*stack)[*stackpointer]){
+			address:=int(bytearray[programCounter])
+			programCounter=address
+			}else{
+				programCounter++
+			}
+			*stackpointer++
+			
 		}
     }
 

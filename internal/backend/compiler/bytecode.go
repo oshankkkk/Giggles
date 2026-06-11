@@ -22,6 +22,8 @@ var Opcode = map[string]int{
 	"LTE":   15, // <=
 	"EQ":    16, // ==
 	"NEQ":   17, // !=
+	"JMP":18,
+	"JIF":19,
 }
 
 var OpName = map[int]string{
@@ -42,6 +44,8 @@ var OpName = map[int]string{
 	15: "LTE",
 	16: "EQ",
 	17: "NEQ",
+	18:"JMP",
+	19:"JIF",
 }
 
 func ToBytecode(program []string)([]byte,[]int,[]string){

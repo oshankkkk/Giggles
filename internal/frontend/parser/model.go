@@ -64,12 +64,15 @@ type ExprStatement struct {
 }
 
 type Condition struct{
-	Value ASTNode
+	Condition ASTNode
+	ElseType lexer.Token 
+	HasElse bool
+	Result ASTNode
+	ElseResult ASTNode
 	Line int
 	Column int
-
+	
 }
-
 type Loop struct{
 	Value ASTNode
 	Line int

@@ -24,7 +24,7 @@ func TestMachineBinaryOp(t *testing.T) {
 }
 
 func TestMachineVariables(t *testing.T) {
-	// let x = 5; x * 2
+	// int x = 5; x * 2
 	// PUSH 5, VAR_DEC x, VAR x, PUSH 2, MUL
 	// PUSH=1, VAR_DEC=6, VAR=7, MUL=4
 	bytearray := []byte{1, 0, 6, 0, 7, 0, 1, 1, 4}

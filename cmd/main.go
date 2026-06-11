@@ -5,10 +5,10 @@ import (
 	"os"
 	"lang/internal/repl"
 	"strings"
-	"lang/internal/backend/compiler"
+//	"lang/internal/backend/compiler"
 	"lang/internal/frontend/lexer"
 	"lang/internal/frontend/parser"
-	"lang/internal/backend/vm"
+//	"lang/internal/backend/vm"
 )
 
   	var stack = make([]int, 1024)
@@ -33,14 +33,14 @@ func readscript(path string){
 	rootnode:=parser.Run(&lexer)	
 	prettyprinter(rootnode,0)
 	//fumt.Println("yaya")
-		bytecodelist:=compiler.Compile(rootnode)
-
-		bytearray,constTable,vartable:=compiler.ToBytecode(bytecodelist)
-
-		ans:=vm.Machine(bytearray,constTable,vartable,&stack,&stackpointer,&heap)	
-
-		fmt.Println(ans)
-
+//		bytecodelist:=compiler.Compile(rootnode)
+//
+//		bytearray,constTable,vartable:=compiler.ToBytecode(bytecodelist)
+//
+//		ans:=vm.Machine(bytearray,constTable,vartable,&stack,&stackpointer,&heap)	
+//
+//		fmt.Println(ans)
+//
 	fmt.Println("end of program")
 
 }
@@ -73,6 +73,12 @@ func prettyprinter(ex parser.ASTNode, indent int) {
 	case parser.Unary:
 		fmt.Printf("%sUnary\n", pad)
 		prettyprinter(n.Value, indent+1)
+	case parser.Condition:
+		fmt.Printf("%sCondition\n", pad)
+		prettyprinter(n.Condition, indent+1)
+		prettyprinter(n.Result, indent+2)
+		prettyprinter(n.ElseResult, indent+3)
+
 	default:
 		fmt.Printf("%s???\n", pad)
 	}

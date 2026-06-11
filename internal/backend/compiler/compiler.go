@@ -33,6 +33,12 @@ func Compile(ast parser.ASTNode)[]string{
 		list = append(list, "VAR",value.Name.Value)
 
 	}
+
+	//if value,ok:=ast.(parser.Condition);ok{
+	//	list = append(list, "JIF")
+	//	list = append(list, Compile(value.Value)...)
+	//}
+
 	if value,ok:=ast.(parser.Literal);ok{
 		//intvalue,err:=strconv.Atoi(value.Value.Value)
 		//check(err)
@@ -74,6 +80,9 @@ func Compile(ast parser.ASTNode)[]string{
 			opcode = "EQ"
 		case lexer.NOT_EQUAL:
 			opcode = "NEQ"
+		//case lexer.NOT_EQUAL:
+		//	opcode = "NEQ"
+
 		}		
 
 		list = append(list, opcode)

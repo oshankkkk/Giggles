@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	//"go/constant"
 	"lang/internal/frontend/lexer"
 )
 
@@ -104,7 +105,7 @@ func (p *Parser)expstatement() ASTNode {
 
 func (p *Parser) parseStart() ASTNode {
 
-	if p.current.Type == lexer.NUMBER ||  p.current.Type == lexer.TRUE || p.current.Type== lexer.FALSE{
+	if p.current.Type == lexer.NUMBER ||  p.current.Type == lexer.TRUE || p.current.Type== lexer.FALSE {
 		node := Literal{
 			Value: p.current,
 			Line: p.current.Line,
@@ -148,23 +149,49 @@ func (p *Parser) parseStart() ASTNode {
 		}
 	}
 
-	//if p.current.Type==lexer.IF{
-	//	token:=p.nextToken()
-	//	return Condition{
-	//		Value: p.parser(0),
-	//		Line: token.Line,
-	//		Column: token.Column,
-	//	}
-	//}
+	if p.current.Type == lexer.IF {
+		token := p.current
+		line := token.Line
+		col := token.Column
 
-	//if p.current.Type==lexer.FOR{
-	//	token:=p.nextToken()
-	//	return Loop{
-	//		Value: p.parser(0),
-	//		Line: token.Line,
-	//		Column: token.Column,
-	//	}
-	//}
+		p.nextToken() // move into condition
+
+		condition := p.parser(0)
+		//p.nextToken()
+		thenResult := p.statementparser()
+
+		//p.nextToken()
+		var elseResult ASTNode
+		hasElse := false
+
+		if p.current.Type == lexer.ELSE {
+			hasElse = true
+			p.nextToken() // consume ELSE
+
+		//p.nextToken()
+			elseResult = p.statementparser()
+
+		//p.nextToken()
+		}
+
+		return Condition{
+			Condition:  condition,
+			Result:     thenResult,
+			ElseResult:  elseResult,
+			HasElse:     hasElse,
+			Line:        line,
+			Column:      col,
+		}
+	}
+
+	if p.current.Type==lexer.FOR{
+		token:=p.nextToken()
+		return Loop{
+			Value: p.parser(0),
+			Line: token.Line,
+			Column: token.Column,
+		}
+	}
 
 	//this idk
 	return Binary{}
