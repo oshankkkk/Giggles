@@ -6,14 +6,26 @@ import (
 )
 
 func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack *[]int,stackpointer *int,heap *map[string]int) int {
+
     var programCounter int
 	var ans int
     for programCounter < len(bytearray) {
-        opcode := int(bytearray[programCounter])
-        switch compiler.OpName[opcode] {
-        case "PUSH":
+
+		opcode := int(bytearray[programCounter])
+
+		fmt.Println(
+			"ProCount:", programCounter,
+			"OPname:", compiler.OpName[opcode],
+			"SPointer:", *stackpointer,
+			"STACK:", (*stack)[:*stackpointer],
+		)
+
+		switch compiler.OpName[opcode] {
+
+		case "PUSH":
             programCounter++
             number := counterTable[int(bytearray[programCounter])]
+			fmt.Println(number)
             (*stack)[*stackpointer] = number
             *stackpointer++
             programCounter++
@@ -37,7 +49,7 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 			ident:=varConstTable[int(bytearray[programCounter])]
 			value:=(*heap)[ident]
 			(*stack)[*stackpointer]=value
-			*stackpointer++
+//			*stackpointer++
             programCounter++
         case "ADD":
             *stackpointer--
@@ -149,13 +161,13 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 			programCounter++
 		case "JMP":
 			programCounter++
-			address:=int(bytearray[programCounter])
+			address:=counterTable[int(bytearray[programCounter])]
 			programCounter=address
 		case "JIF":
 			programCounter++
 			*stackpointer--
-			if toBool((*stack)[*stackpointer]){
-			address:=int(bytearray[programCounter])
+			if !toBool((*stack)[*stackpointer]){
+			address:=counterTable[int(bytearray[programCounter])]
 			programCounter=address
 			}else{
 				programCounter++

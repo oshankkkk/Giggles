@@ -58,6 +58,7 @@ func ToBytecode(program []string)([]byte,[]int,[]string){
 			bytearray = append(bytearray, byte(opcode))
 		}else {
 			digit,err:=strconv.Atoi(val)
+			//not numbers
 			if err!=nil{
 			varConstTable = append(varConstTable, val)	
 			bytearray = append(bytearray, byte(len(varConstTable)-1))

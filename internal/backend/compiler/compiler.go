@@ -1,8 +1,10 @@
 package compiler
 
 import (
+	//"fmt"
 	"lang/internal/frontend/lexer"
 	"lang/internal/frontend/parser"
+	"strconv"
 )
 var bytecode []byte
 
@@ -31,13 +33,43 @@ func Compile(ast parser.ASTNode)[]string{
 	}
 	if value,ok:=ast.(parser.Identifier);ok{
 		list = append(list, "VAR",value.Name.Value)
-
 	}
 
-	//if value,ok:=ast.(parser.Condition);ok{
-	//	list = append(list, "JIF")
-	//	list = append(list, Compile(value.Value)...)
-	//}
+	if value,ok:=ast.(parser.Condition);ok{
+
+
+list = append(list, Compile(value.Condition)...)
+
+jifPos := len(list)
+list = append(list, "JIF", "0")  
+
+
+resultCode := Compile(value.Result)
+
+if value.HasElse {
+    elseCode := Compile(value.ElseResult)
+
+    list = append(list, resultCode...)  // then 
+
+    jmpPos := len(list)
+    list = append(list, "JMP", "0")
+
+    // JIF start of else
+    list[jifPos+1] = strconv.Itoa(len(list))
+
+    list = append(list, elseCode...)   // else
+
+    // JMP past else
+    list[jmpPos+1] = strconv.Itoa(len(list))
+} else {
+    list = append(list, resultCode...) // then
+
+
+    // JIF jumps here (past then, no else)
+    list[jifPos+1] = strconv.Itoa(len(list))
+}
+
+}
 
 	if value,ok:=ast.(parser.Literal);ok{
 		//intvalue,err:=strconv.Atoi(value.Value.Value)
@@ -80,9 +112,6 @@ func Compile(ast parser.ASTNode)[]string{
 			opcode = "EQ"
 		case lexer.NOT_EQUAL:
 			opcode = "NEQ"
-		//case lexer.NOT_EQUAL:
-		//	opcode = "NEQ"
-
 		}		
 
 		list = append(list, opcode)
