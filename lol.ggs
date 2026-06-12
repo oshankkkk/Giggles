@@ -1,4 +1,5 @@
-if 2>1
-int a=1-1
-else int b=2+2 
+for 100<10
+1+1
+else 
+2+2
 

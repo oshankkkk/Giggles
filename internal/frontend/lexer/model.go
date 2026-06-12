@@ -46,7 +46,7 @@ const (
 	LOCAL  TokenType = "LOCAL"
 	RETURN TokenType = "RETURN"
 
-	WHILE TokenType = "WHILE"
+//	WHILE TokenType = "WHILE"
 	FOR   TokenType = "FOR"
 	BREAK TokenType = "BREAK"
 	CONTINUE TokenType = "CONTINUE"
@@ -117,7 +117,7 @@ var keywordTokens=map[string]TokenType{
 	"string": TYPEDEFF,
 	"double": TYPEDEFF,
 	"bool": TYPEDEFF,
-	"while":    WHILE,
+//	"while":    WHILE,
 	"for":      FOR,
 	"break":    BREAK,
 	"continue": CONTINUE,

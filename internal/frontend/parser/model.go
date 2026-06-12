@@ -65,19 +65,13 @@ type ExprStatement struct {
 
 type Condition struct{
 	Condition ASTNode
-	ElseType lexer.Token 
 	HasElse bool
+	Looped bool
 	Result ASTNode
 	ElseResult ASTNode
 	Line int
 	Column int
 	
-}
-type Loop struct{
-	Value ASTNode
-	Line int
-	Column int
-
 }
 func (n Program) Expression()       {}
 func (n Literal) Expression()       {}
@@ -86,7 +80,6 @@ func (n Binary) Expression()        {}
 func (n Unary) Expression()         {}
 func (n Groups) Expression()        {}
 func (n Condition) Expression()        {}
-func (n Loop) Expression()        {}
 func (n VarDecl) Expression()       {}
 func (n ExprStatement) Expression() {}
 

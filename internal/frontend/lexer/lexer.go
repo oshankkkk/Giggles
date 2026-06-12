@@ -169,8 +169,6 @@ func (l *Lexer) NextToken() Token {
 			return tok
 		}
 
-
-
 		// identifiers / keywords
 		if isAlpha(char) {
 			start := l.pointer
