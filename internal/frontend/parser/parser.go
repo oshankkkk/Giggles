@@ -149,7 +149,12 @@ func (p *Parser) parseStart() ASTNode {
 		}
 	}
 
-	if p.current.Type == lexer.IF {
+
+	if p.current.Type == lexer.IF || p.current.Type==lexer.FOR{
+		var isLooped bool
+		if p.current.Type==lexer.FOR{
+			isLooped=true
+		}
 		token := p.current
 		line := token.Line
 		col := token.Column
@@ -167,10 +172,8 @@ func (p *Parser) parseStart() ASTNode {
 		if p.current.Type == lexer.ELSE {
 			hasElse = true
 			p.nextToken() // consume ELSE
-
 		//p.nextToken()
 			elseResult = p.statementparser()
-
 		//p.nextToken()
 		}
 
@@ -179,17 +182,9 @@ func (p *Parser) parseStart() ASTNode {
 			Result:     thenResult,
 			ElseResult:  elseResult,
 			HasElse:     hasElse,
+			Looped:isLooped,
 			Line:        line,
 			Column:      col,
-		}
-	}
-
-	if p.current.Type==lexer.FOR{
-		token:=p.nextToken()
-		return Loop{
-			Value: p.parser(0),
-			Line: token.Line,
-			Column: token.Column,
 		}
 	}
 

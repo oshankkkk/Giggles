@@ -42,14 +42,13 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 			*stackpointer--
             globalvar:= varConstTable[int(bytearray[programCounter])]
             (*heap)[globalvar] = (*stack)[*stackpointer]
-            *stackpointer++
             programCounter++
 		case "VAR":
 			programCounter++
 			ident:=varConstTable[int(bytearray[programCounter])]
 			value:=(*heap)[ident]
 			(*stack)[*stackpointer]=value
-//			*stackpointer++
+			*stackpointer++
             programCounter++
         case "ADD":
             *stackpointer--
@@ -172,7 +171,6 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 			}else{
 				programCounter++
 			}
-			*stackpointer++
 			
 		}
     }

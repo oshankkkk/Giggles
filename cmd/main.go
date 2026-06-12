@@ -76,8 +76,8 @@ func prettyprinter(ex parser.ASTNode, indent int) {
 	case parser.Condition:
 		fmt.Printf("%sCondition\n", pad)
 		prettyprinter(n.Condition, indent+1)
-		prettyprinter(n.Result, indent+2)
-		prettyprinter(n.ElseResult, indent+3)
+		prettyprinter(n.Result, indent+1)
+		prettyprinter(n.ElseResult, indent+1)
 
 	default:
 		fmt.Printf("%s???\n", pad)

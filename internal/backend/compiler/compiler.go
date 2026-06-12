@@ -20,6 +20,7 @@ func Compile(ast parser.ASTNode)[]string{
 
 	if value,ok:=ast.(parser.ExprStatement);ok{
 		list = append(list, Compile(value.Expr)...)
+
 	}
 
 	if value,ok:=ast.(parser.Groups);ok{
@@ -36,40 +37,45 @@ func Compile(ast parser.ASTNode)[]string{
 	}
 
 	if value,ok:=ast.(parser.Condition);ok{
+		condPos:=len(list)
+		list = append(list, Compile(value.Condition)...)
+
+		jifPos := len(list)
+		list = append(list, "JIF", "0")  
+
+		resultCode := Compile(value.Result)
+
+		list = append(list, resultCode...)  // then 
+
+		if value.Looped{
+			list = append(list, "JMP",strconv.Itoa(condPos))  // then 
+
+			elseCode := Compile(value.ElseResult)
+			list[jifPos+1] = strconv.Itoa(len(list))
+			list = append(list, elseCode...)   // else
+
+		}else if value.HasElse {
+			elseCode := Compile(value.ElseResult)
+
+			
+			jmpPos := len(list)
+			list = append(list, "JMP", "0")
+
+			// JIF start of else
+			list[jifPos+1] = strconv.Itoa(len(list))
+
+			list = append(list, elseCode...)   // else
 
 
-list = append(list, Compile(value.Condition)...)
+		
+			// JMP past else if then works
+			list[jmpPos+1] = strconv.Itoa(len(list))
+		} else {
+			// JIF jumps here past then
+			list[jifPos+1] = strconv.Itoa(len(list))
+		}
 
-jifPos := len(list)
-list = append(list, "JIF", "0")  
-
-
-resultCode := Compile(value.Result)
-
-if value.HasElse {
-    elseCode := Compile(value.ElseResult)
-
-    list = append(list, resultCode...)  // then 
-
-    jmpPos := len(list)
-    list = append(list, "JMP", "0")
-
-    // JIF start of else
-    list[jifPos+1] = strconv.Itoa(len(list))
-
-    list = append(list, elseCode...)   // else
-
-    // JMP past else
-    list[jmpPos+1] = strconv.Itoa(len(list))
-} else {
-    list = append(list, resultCode...) // then
-
-
-    // JIF jumps here (past then, no else)
-    list[jifPos+1] = strconv.Itoa(len(list))
-}
-
-}
+	}
 
 	if value,ok:=ast.(parser.Literal);ok{
 		//intvalue,err:=strconv.Atoi(value.Value.Value)
