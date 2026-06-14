@@ -96,13 +96,14 @@ func (l *Lexer) NextToken() Token {
 				Value:  str,
 				Line:   l.line,
 				Column: startCol,
+				
 			}
 			l.idCounter++
 			return tok
 		}
-
 		// numbers
 		if isDigit(char) {
+
 			start := l.pointer
 			startCol := l.column
 
@@ -110,7 +111,6 @@ func (l *Lexer) NextToken() Token {
 				l.move()
 			}
 
-			// decimal part
 			if l.pointer < len(l.source) && l.current() == '.' &&
 				l.peek() != 0 && isDigit(l.peek()) {
 
@@ -135,7 +135,6 @@ func (l *Lexer) NextToken() Token {
 		// double char tokens
 		if l.pointer+1 < len(l.source) {
 
-			fmt.Println("hi")
 			two := l.source[l.pointer : l.pointer+2]
 
 			if tt, ok := doubleCharTokens[two]; ok {
@@ -169,7 +168,7 @@ func (l *Lexer) NextToken() Token {
 			return tok
 		}
 
-		// identifiers / keywords
+		// identifiers / keywords vars only start with a letter
 		if isAlpha(char) {
 			start := l.pointer
 			startCol := l.column

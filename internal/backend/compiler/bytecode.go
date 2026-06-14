@@ -48,7 +48,7 @@ var OpName = map[int]string{
 	19:"JIF",
 }
 
-func ToBytecode2(program []string)([]byte,[]int,[]string){
+func ToBytecode(program []string)([]byte,[]int,[]string){
 	var constantTable []int
 	var varConstTable []string
 	var bytearray []byte
@@ -71,7 +71,7 @@ func ToBytecode2(program []string)([]byte,[]int,[]string){
 	return bytearray,constantTable,varConstTable
 }
 
-func ToBytecode(program []string) ([]byte, []int, []string) {
+func ToBytecode2(program []string) ([]byte, []int, []string) {
     var constantTable []int
     var varConstTable []string
     var bytearray []byte

@@ -25,7 +25,6 @@ func Compile(ast parser.ASTNode)[]string{
 
 	if value,ok:=ast.(parser.Groups);ok{
 		list = append(list, Compile(value.Value)...)
-
 	}
 	if value,ok:=ast.(parser.VarDecl);ok{
 		list = append(list, Compile(value.Value)...)
@@ -118,6 +117,8 @@ func Compile(ast parser.ASTNode)[]string{
 			opcode = "EQ"
 		case lexer.NOT_EQUAL:
 			opcode = "NEQ"
+//		case lexer.EQUAL:
+//			opcode="ASS"
 		}		
 
 		list = append(list, opcode)

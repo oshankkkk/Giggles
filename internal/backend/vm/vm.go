@@ -13,12 +13,12 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 
 		opcode := int(bytearray[programCounter])
 
-		fmt.Println(
-			"ProCount:", programCounter,
-			"OPname:", compiler.OpName[opcode],
-			"SPointer:", *stackpointer,
-			"STACK:", (*stack)[:*stackpointer],
-		)
+	//	fmt.Println(
+	//		"ProCount:", programCounter,
+	//		"OPname:", compiler.OpName[opcode],
+	//		"SPointer:", *stackpointer,
+	//		"STACK:", (*stack)[:*stackpointer],
+	//	)
 
 		switch compiler.OpName[opcode] {
 
@@ -50,6 +50,7 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 			(*stack)[*stackpointer]=value
 			*stackpointer++
             programCounter++
+
         case "ADD":
             *stackpointer--
             left := (*stack)[*stackpointer]
@@ -171,12 +172,12 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 			}else{
 				programCounter++
 			}
-			
+
 		}
     }
 
-	fmt.Println(heap)
-	fmt.Println(stack)
+//	fmt.Println(heap)
+//	fmt.Println(stack)
     return ans
 }
 func toBool(val int)bool{

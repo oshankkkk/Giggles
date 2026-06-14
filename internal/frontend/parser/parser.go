@@ -16,6 +16,8 @@ var bpmap = map[lexer.TokenType]int{
 	lexer.STAR: 50,
 	lexer.SLASH: 50,
 
+	lexer.EQUAL: 20,
+
 	lexer.PLUS: 40,
 	lexer.MINUS: 40,
 
@@ -26,6 +28,7 @@ var bpmap = map[lexer.TokenType]int{
 
 	lexer.EQUAL_EQUAL: 20,
 	lexer.NOT_EQUAL: 20,
+
 
 	lexer.AND: 10,
 	lexer.OR:  5,
@@ -56,27 +59,38 @@ func (p *Parser)programparser() ASTNode {
 }
 
 func (p *Parser)statementparser() ASTNode {
+	fmt.Println("int hoyano")
 	if p.current.Type== lexer.TYPEDEFF{
 		return p.vardecparser()
 	}
+
+	fmt.Println("int na neh")
 	return p.expstatement()
+
 }
+
+func (p *Parser)expstatement() ASTNode {
+	expr := p.parser(0)
+
+	fmt.Println("int expexp not real")
+	return ExprStatement{Expr: expr, Line: p.current.Line, Column: p.current.Column}
+}
+
 
 func (p *Parser)vardecparser() ASTNode{
 	//we have to call the next token now
-
 	typedeff:=p.nextToken()
 	//ok:=lexer.next(*token) 		
 
 	if p.current.Type != lexer.IDENTIFIER {
-		panic(fmt.Sprintf("expected identifier after 'let' at Line %d",typedeff.Line))
+		panic(fmt.Sprintf("expected identifier but found %s at Line %d",p.current.Value,typedeff.Line))
 	}
 
 	varName:=p.nextToken()
 	// consume identifier
 
 	if p.current.Type != lexer.EQUAL {
-		panic(fmt.Sprintf("expected '=' after identifier '%s' at Line %d", varName.Value, varName.Line))
+		panic(fmt.Sprintf("expected '=' but found '%s' at Line %d", varName.Value, varName.Line))
 	}
 
 	p.nextToken()
@@ -95,15 +109,8 @@ func (p *Parser)vardecparser() ASTNode{
 		// 3						
 	}
 }
-
-func (p *Parser)expstatement() ASTNode {
-	expr := p.parser(0)
-
-	return ExprStatement{Expr: expr, Line: p.current.Line, Column: p.current.Column}
-}
-
-
 func (p *Parser) parseStart() ASTNode {
+	fmt.Println(p.current.Value)
 
 	if p.current.Type == lexer.NUMBER ||  p.current.Type == lexer.TRUE || p.current.Type== lexer.FALSE {
 		node := Literal{
@@ -116,6 +123,7 @@ func (p *Parser) parseStart() ASTNode {
 	}
 
 	if p.current.Type == lexer.IDENTIFIER {
+		fmt.Println("idf maked")
 		node := Identifier{
 			Name: p.current,
 			Line: p.current.Line,
@@ -124,7 +132,18 @@ func (p *Parser) parseStart() ASTNode {
 		p.nextToken()
 		return node
 	}
-	
+
+//	if p.current.Type == lexer.EQUAL {
+//		p.nextToken()
+//		fmt.Println("this is a assignment")
+//		//panic(fmt.Sprintf("expected '=' but found '%s' at Line %d", varName.Value, varName.Line))
+//	}
+//
+
+	if p.current.Type == lexer.ILLEGAL{
+		panic(fmt.Sprintf("expected '%s' at Line %d", p.current.Value,p.current.Line))
+	}
+
 	if p.current.Type == lexer.NOT {
 		token := p.nextToken()
 
@@ -148,7 +167,6 @@ func (p *Parser) parseStart() ASTNode {
 			Column: token.Column,
 		}
 	}
-
 
 	if p.current.Type == lexer.IF || p.current.Type==lexer.FOR{
 		var isLooped bool
@@ -187,9 +205,7 @@ func (p *Parser) parseStart() ASTNode {
 			Column:      col,
 		}
 	}
-
-	//this idk
-	return Binary{}
+panic("eeeeehdhdhd")
 }
 
 func (p *Parser) parser(minBp int) ASTNode {
@@ -197,6 +213,7 @@ func (p *Parser) parser(minBp int) ASTNode {
 
 	for {
 		value, ok := bpmap[p.current.Type]
+		fmt.Println(value)
 		if ok && value >minBp {
 
 			op := p.current
