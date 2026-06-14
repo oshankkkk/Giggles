@@ -10,7 +10,9 @@ type Parser struct {
 	pointer int
 	current lexer.Token
 	lexer *lexer.Lexer
+	symboltb map[string]bool
 }
+
 var bpmap = map[lexer.TokenType]int{
 
 	lexer.STAR: 50,
@@ -38,6 +40,7 @@ func (p *Parser) Run(lexer *lexer.Lexer)ASTNode{
 
 	p.lexer=lexer
 	p.nextToken()
+	p.symboltb = make(map[string]bool)
 	prog:=p.programparser()
 	return prog
 }
@@ -104,7 +107,9 @@ func (p *Parser)vardecparser() ASTNode{
 
 	val := p.parser(0)
 	fmt.Println("var is made")
-	return VarDecl{
+	p.symboltb[varName.Value]=isConst
+
+	return 	VarDecl{
 		Typedeff:typedeff.Value,
 		Name: varName,
 		Value:    val,
@@ -112,6 +117,8 @@ func (p *Parser)vardecparser() ASTNode{
 		Column:   varName.Column,
 		isConst: isConst,
 		}
+
+
 }
 func (p *Parser) parseStart() ASTNode {
 	fmt.Println(p.current.Value)
@@ -127,21 +134,23 @@ func (p *Parser) parseStart() ASTNode {
 	}
 
 	if p.current.Type == lexer.IDENTIFIER {
+		old:=p.nextToken()
+	if value,ok:=p.symboltb[old.Value];ok{
+		if value==true && p.current.Type==lexer.EQUAL{
+				panic("const var cant be mutated, gotta use the mut keyword")
+			}else{
+	
 		node := Identifier{
-			Name: p.current,
-			Line: p.current.Line,
-			Column: p.current.Column,
+			Name: old,
+			Line: old.Line,
+			Column: old.Column,
 		}
-		p.nextToken()
 		return node
+			}
+		}else{
+			panic("var not defined")
+		}
 	}
-
-//	if p.current.Type == lexer.EQUAL {
-//		p.nextToken()
-//		fmt.Println("this is a assignment")
-//		//panic(fmt.Sprintf("expected '=' but found '%s' at Line %d", varName.Value, varName.Line))
-//	}
-//
 
 	if p.current.Type == lexer.ILLEGAL{
 		panic(fmt.Sprintf("expected '%s' at Line %d", p.current.Value,p.current.Line))
@@ -223,6 +232,7 @@ func (p *Parser) parser(minBp int) ASTNode {
 			p.nextToken()
 
 			right := p.parser(value+1)
+		
 			node = Binary{
 				Left: node,
 				Operator: op.Type,
@@ -233,8 +243,6 @@ func (p *Parser) parser(minBp int) ASTNode {
 		}else{
 			break
 		}
-
 	}
-
 	return node
 }

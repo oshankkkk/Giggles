@@ -21,7 +21,6 @@ func Compile(ast parser.ASTNode)[]string{
 
 	if value,ok:=ast.(parser.ExprStatement);ok{
 		list = append(list, Compile(value.Expr)...)
-
 	}
 
 	if value,ok:=ast.(parser.Groups);ok{
@@ -78,7 +77,6 @@ func Compile(ast parser.ASTNode)[]string{
 		//intvalue,err:=strconv.Atoi(value.Value.Value)
 		//check(err)
 		if value.Value.Type== lexer.TRUE{
-
 			return append(list,"TRUE")
 		}else if value.Value.Type== lexer.FALSE{
 			return append(list,"FALSE")
@@ -93,10 +91,8 @@ func Compile(ast parser.ASTNode)[]string{
 		switch value.Operator {
 		case lexer.MINUS:
 			opcode = "SUB"
-		
 		case lexer.PLUS:
 			opcode = "ADD"
-
 		case lexer.SLASH:
 			opcode = "DIV"
 		case lexer.STAR:
