@@ -1,7 +1,20 @@
 # Giggles
 
+#### TODOS
+- type system
+- string support
+- if-then syntax sugar with end
+- make all variables cons by default
+- make all var global by default
+- local keyword for local vars
+- scope handling
+- func support
+- print() and scanner() functions in stdlib
+
+
 ## A toy interpreter 
 References:
+- find my notes on https://oshanswe.com/
 - https://craftinginterpreters.com/
 - https://dpvipracollege.ac.in/wp-content/uploads/2023/01/Alfred-V.-Aho-Monica-S.-Lam-Ravi-Sethi-Jeffrey-D.-Ullman-Compilers-Principles-Techniques-and-Tools-Pearson_Addison-Wesley-2007.pdf
 - https://youtu.be/ENKT0Z3gldE?si=_dIebGGxXJ5CDZFK
@@ -12,13 +25,12 @@ No args → repl() (interactive console)
 One arg → runFile() (run a .lox script)
 Anything else → print usage error
 
-#### A tiny Ballerina-inspired compiler/interpreter in Go for learning compiler frontend, type checking, IR generation, and interpretation.
-##### (It compiles to IR and interpretes it through Go)
 
+#### It compiles to bytecode interpretes it through Go
 + Go implementation
-+ lua like syntax
++ lua like synta (ish)
 + symbol/type system
-+ IR interpreter instead of assembly
++ IR VM interpreter 
 
 #### Features
 - numbers
@@ -27,12 +39,57 @@ Anything else → print usage error
 - nil
 - variables
 - functions
+--- later --- 
 - classes
 - instances
 - methods
 - inheritance
 
-#### Dreambirding giggles ( copy pasting language features of dreambird )
+#### Syntax:
+##### (lua inspired syntax)
+
+```
+-- numbers
+int age = 21
+int price = 99.50
+int total = age + price
+
+-- strings
+string name = "Oshan"
+string message = "Hello, " .. name
+
+-- booleans
+bool isReady = true
+bool isdone = false
+
+if isready then
+  print("ready")
+end
+
+-- nil
+int value = nil
+
+if value == nil then
+  print("nothing here")
+end
+
+-- variables
+int mut x = 10
+x = x + 5
+
+string langName = "LuLox"
+
+-- functions
+function add(a, b)
+  return a + b
+end
+
+print(add(2, 3))
+
+```
+
+### Features i wanna implement eventually
+#### (borrowed from project dreambird)
 Write five or more equals signs to start a new file. This removes the need for multiple files or any build process.
 
 ```
@@ -116,50 +173,6 @@ print( // This is probably fine
 If you're unsure, that's ok. You can put a question mark at the end of a line instead. It prints debug info about that line to the console for you.
 
 print("Hello world")?
-
-```
-
-
-#### Syntax:
-##### (lua inspired syntax)
-
-```
--- numbers
-int age = 21
-int price = 99.50
-int total = age + price
-
--- strings
-string name = "Oshan"
-string message = "Hello, " .. name
-
--- booleans
-bool isReady = true
-bool isdone = false
-
-if isready then
-  print("ready")
-end
-
--- nil
-int value = nil
-
-if value == nil then
-  print("nothing here")
-end
-
--- variables
-int mut x = 10
-x = x + 5
-
-string langName = "LuLox"
-
--- functions
-function add(a, b)
-  return a + b
-end
-
-print(add(2, 3))
 
 ```
 
