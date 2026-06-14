@@ -59,12 +59,10 @@ func (p *Parser)programparser() ASTNode {
 }
 
 func (p *Parser)statementparser() ASTNode {
-	fmt.Println("int hoyano")
 	if p.current.Type== lexer.TYPEDEFF{
 		return p.vardecparser()
 	}
 
-	fmt.Println("int na neh")
 	return p.expstatement()
 
 }
@@ -72,21 +70,29 @@ func (p *Parser)statementparser() ASTNode {
 func (p *Parser)expstatement() ASTNode {
 	expr := p.parser(0)
 
-	fmt.Println("int expexp not real")
 	return ExprStatement{Expr: expr, Line: p.current.Line, Column: p.current.Column}
 }
 
 
 func (p *Parser)vardecparser() ASTNode{
 	//we have to call the next token now
+	isConst := true
+	var varName lexer.Token
 	typedeff:=p.nextToken()
 	//ok:=lexer.next(*token) 		
 
-	if p.current.Type != lexer.IDENTIFIER {
+	if !(p.current.Type == lexer.IDENTIFIER || p.current.Type ==lexer.MUT) {
 		panic(fmt.Sprintf("expected identifier but found %s at Line %d",p.current.Value,typedeff.Line))
 	}
 
-	varName:=p.nextToken()
+	mut:=p.nextToken()
+	if mut.Type==lexer.MUT{
+		isConst=false
+		varName=p.nextToken()
+	}else{
+		varName=mut
+	}
+
 	// consume identifier
 
 	if p.current.Type != lexer.EQUAL {
@@ -104,10 +110,8 @@ func (p *Parser)vardecparser() ASTNode{
 		Value:    val,
 		Line: varName.Line,
 		Column:   varName.Column,
-		// what happend if we go 
-		//int x=
-		// 3						
-	}
+		isConst: isConst,
+		}
 }
 func (p *Parser) parseStart() ASTNode {
 	fmt.Println(p.current.Value)
@@ -123,7 +127,6 @@ func (p *Parser) parseStart() ASTNode {
 	}
 
 	if p.current.Type == lexer.IDENTIFIER {
-		fmt.Println("idf maked")
 		node := Identifier{
 			Name: p.current,
 			Line: p.current.Line,

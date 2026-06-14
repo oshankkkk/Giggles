@@ -16,15 +16,6 @@ type Literal struct {
 	Column   int
 }
 
-//type Literal struct {
-//	Value    lexer.Token
-//	Line     int
-//	Column   int
-//}
-
-
-
-
 type Identifier struct {
 	Name     lexer.Token
 	Line     int
@@ -57,6 +48,7 @@ type VarDecl struct {
 	Value    ASTNode
 	Line     int
 	Column   int
+	isConst bool
 }
 
 type ExprStatement struct {

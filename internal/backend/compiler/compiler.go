@@ -12,6 +12,7 @@ var bytecode []byte
 func Compile(ast parser.ASTNode)[]string{
 	var opcode string
 	list:=[]string{}
+
 	if value,ok:=ast.(parser.Program);ok{
 		for _,val:=range value.Statements{
 			list = append(list, Compile(val)...)
@@ -55,7 +56,6 @@ func Compile(ast parser.ASTNode)[]string{
 
 		}else if value.HasElse {
 			elseCode := Compile(value.ElseResult)
-
 			
 			jmpPos := len(list)
 			list = append(list, "JMP", "0")
@@ -65,8 +65,6 @@ func Compile(ast parser.ASTNode)[]string{
 
 			list = append(list, elseCode...)   // else
 
-
-		
 			// JMP past else if then works
 			list[jmpPos+1] = strconv.Itoa(len(list))
 		} else {
@@ -93,10 +91,12 @@ func Compile(ast parser.ASTNode)[]string{
 		list = append(list, Compile(value.Left)...)
 		list = append(list, Compile(value.Right)...)
 		switch value.Operator {
-		case lexer.PLUS:
-			opcode = "ADD"
 		case lexer.MINUS:
 			opcode = "SUB"
+		
+		case lexer.PLUS:
+			opcode = "ADD"
+
 		case lexer.SLASH:
 			opcode = "DIV"
 		case lexer.STAR:
@@ -117,8 +117,8 @@ func Compile(ast parser.ASTNode)[]string{
 			opcode = "EQ"
 		case lexer.NOT_EQUAL:
 			opcode = "NEQ"
-//		case lexer.EQUAL:
-//			opcode="ASS"
+		case lexer.EQUAL:
+			opcode="ASS"
 		}		
 
 		list = append(list, opcode)

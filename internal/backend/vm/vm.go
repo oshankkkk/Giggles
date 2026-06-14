@@ -3,6 +3,7 @@ package vm
 import (
 	"fmt"
 	"lang/internal/backend/compiler"
+	
 )
 
 func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack *[]int,stackpointer *int,heap *map[string]int) int {
@@ -13,12 +14,12 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 
 		opcode := int(bytearray[programCounter])
 
-	//	fmt.Println(
-	//		"ProCount:", programCounter,
-	//		"OPname:", compiler.OpName[opcode],
-	//		"SPointer:", *stackpointer,
-	//		"STACK:", (*stack)[:*stackpointer],
-	//	)
+	fmt.Println(
+		"ProCount:", programCounter,
+		"OPname:", compiler.OpName[opcode],
+		"SPointer:", *stackpointer,
+		"STACK:", (*stack)[:*stackpointer],
+	)
 
 		switch compiler.OpName[opcode] {
 
@@ -45,13 +46,17 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
             programCounter++
 		case "VAR":
 			programCounter++
+			//var string index
 			ident:=varConstTable[int(bytearray[programCounter])]
+			//give the variable string(heap key)
 			value:=(*heap)[ident]
 			(*stack)[*stackpointer]=value
 			*stackpointer++
+			(*stack)[*stackpointer]=int(bytearray[programCounter])
+			*stackpointer++
             programCounter++
-
         case "ADD":
+			fmt.Println("eheeeeeee")
             *stackpointer--
             left := (*stack)[*stackpointer]
             *stackpointer--
@@ -60,6 +65,15 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
             (*stack)[*stackpointer]= ans
             *stackpointer++
             programCounter++
+	   case "ASS":
+		   	*stackpointer--
+			newval:=(*stack)[*stackpointer]
+		   	*stackpointer--
+			index:=(*stack)[*stackpointer]
+			ident:=varConstTable[index]
+			(*heap)[ident]=newval
+			*stackpointer++
+			programCounter++
 		case "SUB":
             *stackpointer--
             left := (*stack)[*stackpointer]
@@ -176,8 +190,8 @@ func Machine(bytearray []byte, counterTable []int, varConstTable []string,stack 
 		}
     }
 
-//	fmt.Println(heap)
-//	fmt.Println(stack)
+	fmt.Println(heap)
+	fmt.Println(stack)
     return ans
 }
 func toBool(val int)bool{

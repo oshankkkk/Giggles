@@ -45,6 +45,7 @@ const (
 	FUNC   TokenType = "FUNC"
 	LOCAL  TokenType = "LOCAL"
 	RETURN TokenType = "RETURN"
+	MUT TokenType = "MUT"
 
 //	WHILE TokenType = "WHILE"
 	FOR   TokenType = "FOR"
@@ -114,18 +115,19 @@ var keywordTokens=map[string]TokenType{
 	"func":     FUNC,
 	"local":    LOCAL,
 	"return":   RETURN,
-	//"let":      LET,
+
 	"int": TYPEDEFF,
 	"string": TYPEDEFF,
 	"double": TYPEDEFF,
 	"bool": TYPEDEFF,
-//	"while":    WHILE,
 	"for":      FOR,
 	"break":    BREAK,
 	"continue": CONTINUE,
+
 	"nil":      NIL,
 	"true": TRUE,
 	"false":FALSE,
+	"mut": MUT,
 
 }
 
