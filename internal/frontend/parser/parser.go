@@ -192,19 +192,43 @@ func (p *Parser) parseStart() ASTNode {
 		p.nextToken() // move into condition
 
 		condition := p.parser(0)
-		//p.nextToken()
-		thenResult := p.statementparser()
+		
+		isBlock := false
+		if p.current.Type == lexer.THEN {
+			isBlock = true
+			p.nextToken()
+		}
 
-		//p.nextToken()
-		var elseResult ASTNode
+		var thenResult []ASTNode
+		if isBlock {
+			for p.current.Type != lexer.ELSE && p.current.Type != lexer.END && p.current.Type != lexer.EOF {
+				thenResult = append(thenResult, p.statementparser())
+			}
+		} else {
+			thenResult = append(thenResult, p.statementparser())
+		}
+
+		var elseResult []ASTNode
 		hasElse := false
 
 		if p.current.Type == lexer.ELSE {
 			hasElse = true
 			p.nextToken() // consume ELSE
-		//p.nextToken()
-			elseResult = p.statementparser()
-		//p.nextToken()
+			if isBlock {
+				for p.current.Type != lexer.END && p.current.Type != lexer.EOF {
+					elseResult = append(elseResult, p.statementparser())
+				}
+			} else {
+				elseResult = append(elseResult, p.statementparser())
+			}
+		}
+
+		if isBlock {
+			if p.current.Type == lexer.END {
+				p.nextToken()
+			} else {
+				panic(fmt.Sprintf("expected 'end' for if-then block at Line %d", token.Line))
+			}
 		}
 
 		return Condition{

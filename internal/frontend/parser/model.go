@@ -61,8 +61,8 @@ type Condition struct{
 	Condition ASTNode
 	HasElse bool
 	Looped bool
-	Result ASTNode
-	ElseResult ASTNode
+	Result []ASTNode
+	ElseResult []ASTNode
 	Line int
 	Column int
 	
@@ -73,7 +73,6 @@ func (n Identifier) Expression()    {}
 func (n Binary) Expression()        {}
 func (n Unary) Expression()         {}
 func (n Groups) Expression()        {}
-func (n Condition) Expression()        {}
+func (n Condition) Expression()     {}
 func (n VarDecl) Expression()       {}
 func (n ExprStatement) Expression() {}
-

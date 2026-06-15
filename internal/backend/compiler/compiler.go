@@ -26,6 +26,7 @@ func Compile(ast parser.ASTNode)[]string{
 	if value,ok:=ast.(parser.Groups);ok{
 		list = append(list, Compile(value.Value)...)
 	}
+
 	if value,ok:=ast.(parser.VarDecl);ok{
 		list = append(list, Compile(value.Value)...)
 		list = append(list, "VAR_DEC",value.Name.Value)
@@ -42,19 +43,29 @@ func Compile(ast parser.ASTNode)[]string{
 		jifPos := len(list)
 		list = append(list, "JIF", "0")  
 
-		resultCode := Compile(value.Result)
+		resultCode := []string{}
+		for _, r := range value.Result {
+			resultCode = append(resultCode, Compile(r)...)
+		}
 
 		list = append(list, resultCode...)  // then 
 
 		if value.Looped{
 			list = append(list, "JMP",strconv.Itoa(condPos))  // then 
 
-			elseCode := Compile(value.ElseResult)
+			elseCode := []string{}
+			for _, e := range value.ElseResult {
+				elseCode = append(elseCode, Compile(e)...)
+			}
 			list[jifPos+1] = strconv.Itoa(len(list))
 			list = append(list, elseCode...)   // else
 
 		}else if value.HasElse {
-			elseCode := Compile(value.ElseResult)
+			elseCode := []string{}
+			for _, e := range value.ElseResult {
+				elseCode = append(elseCode, Compile(e)...)
+			}
+
 			
 			jmpPos := len(list)
 			list = append(list, "JMP", "0")

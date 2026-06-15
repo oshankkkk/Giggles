@@ -53,6 +53,7 @@ func prettyprinter(ex parser.ASTNode, indent int) {
 		for _, s := range n.Statements {
 			prettyprinter(s, indent+1)
 		}
+
 	case parser.VarDecl:
 		fmt.Printf("%sVarDecl(%s)\n", pad, n.Name.Value)
 		prettyprinter(n.Value, indent+1)
@@ -76,8 +77,12 @@ func prettyprinter(ex parser.ASTNode, indent int) {
 	case parser.Condition:
 		fmt.Printf("%sCondition\n", pad)
 		prettyprinter(n.Condition, indent+1)
-		prettyprinter(n.Result, indent+1)
-		prettyprinter(n.ElseResult, indent+1)
+		for _, s := range n.Result {
+			prettyprinter(s, indent+1)
+		}
+		for _, s := range n.ElseResult {
+			prettyprinter(s, indent+1)
+		}
 
 	default:
 		fmt.Printf("%s???\n", pad)
