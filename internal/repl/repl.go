@@ -6,10 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"lang/internal/frontend/parser"
-	"lang/internal/frontend/lexer"
-	"lang/internal/backend/compiler"
-	"lang/internal/backend/vm"
+	"lang/internal/parser"
+	"lang/internal/lexer"
+	"lang/internal/compiler"
+	"lang/internal/vm"
 	
 )
 func check(err error){
@@ -32,9 +32,11 @@ func Run(stack *[]int,stackpointer *int,heap *map[string]int){
 		lexer.ReadLine(input)
 		var parser parser.Parser
 		ast:=parser.Run(&lexer)
-		bytecodelist:=compiler.Compile(ast)
-		bytearray,constTable,vartable:=compiler.ToBytecode(bytecodelist)	
-		ans := vm.Machine(bytearray, constTable, vartable, stack, stackpointer, heap)
+		var comp compiler.Compiler
+		var vm vm.GVM
+		bytecodelist:=comp.Compile(ast)
+		//bytearray,constTable,vartable:=compiler.(bytecodelist)	
+		ans := vm.Machine(bytecodelist, comp.CounterTable)
 		fmt.Println(ans)
 
 	}

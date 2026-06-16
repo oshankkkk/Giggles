@@ -5,10 +5,10 @@ import (
 	"os"
 	"lang/internal/repl"
 	"strings"
-	"lang/internal/backend/compiler"
-	"lang/internal/frontend/lexer"
-	"lang/internal/frontend/parser"
-	"lang/internal/backend/vm"
+	"lang/internal/compiler"
+	"lang/internal/lexer"
+	"lang/internal/parser"
+	"lang/internal/vm"
 )
 
   	var stack = make([]int, 1024)
@@ -32,14 +32,13 @@ func readscript(path string){
 	var parser parser.Parser
 	rootnode:=parser.Run(&lexer)	
 	prettyprinter(rootnode,0)
-	//fumt.Println("yaya")
-		bytecodelist:=compiler.Compile(rootnode)
-
-		bytearray,constTable,vartable:=compiler.ToBytecode(bytecodelist)
-
-		ans:=vm.Machine(bytearray,constTable,vartable,&stack,&stackpointer,&heap)	
-
+		var comp compiler.Compiler
+		var vm vm.GVM
+		bytecodelist:=comp.Compile(rootnode)
+		//bytearray,constTable,vartable:=compiler.(bytecodelist)	
+		ans := vm.Machine(bytecodelist, comp.CounterTable)
 		fmt.Println(ans)
+
 
 	fmt.Println("end of program")
 

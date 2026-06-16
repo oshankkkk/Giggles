@@ -1,6 +1,6 @@
 package parser
 
-import "lang/internal/frontend/lexer"
+import "lang/internal/lexer"
 
 type ASTNode interface {
 	Expression()

@@ -2,7 +2,7 @@ package parser
 
 import (
 	"testing"
-	"lang/internal/frontend/lexer"
+	"lang/internal/lexer"
 	"github.com/stretchr/testify/assert"
 )
 

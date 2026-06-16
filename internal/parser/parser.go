@@ -3,7 +3,7 @@ package parser
 import (
 	"fmt"
 	//"go/constant"
-	"lang/internal/frontend/lexer"
+	"lang/internal/lexer"
 )
 
 type Parser struct {

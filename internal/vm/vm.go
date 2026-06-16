@@ -2,7 +2,7 @@ package vm
 
 import (
 	"fmt"
-	"lang/internal/backend/compiler"
+	"lang/internal/compiler"
 )
 
 type GVM struct {
@@ -14,17 +14,64 @@ type GVM struct {
 func (g *GVM) debugPrint(opcode int) {
 	fmt.Println(
 		"ProCount:", g.programCounter,
-		"OPname:", compiler.OpName[opcode],
+		"OPname:", compiler.Opcode(opcode),
 		"SPointer:", g.stackpointer,
 		"STACK:", g.stack[:g.stackpointer],
 	)
 }
 
-func (g *GVM) MathOps(opcode int) {
+func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
+	g.stack = make([]int, 1024)
 	var ans int
-	switch compiler.OpName[opcode] {
-	case "ADD":
-		fmt.Println("eheeeeeee")
+	for g.programCounter < len(bytearray) {
+		opcode := int(bytearray[g.programCounter])
+		g.debugPrint(opcode)
+		switch compiler.Opcode(opcode) {
+		case compiler.PUSH:
+			g.programCounter++
+			number := counterTable[int(bytearray[g.programCounter])]
+			g.stack[g.stackpointer] = number
+			g.stackpointer++
+			g.programCounter++
+		case compiler.NEQ:
+			g.stackpointer--
+			left := g.stack[g.stackpointer]
+			g.stackpointer--
+			right := g.stack[g.stackpointer]
+			ans = toInt(right != left)
+			g.stack[g.stackpointer] = ans
+			g.stackpointer++
+			g.programCounter++
+		case compiler.JMP:
+			g.programCounter++
+			address := counterTable[int(bytearray[g.programCounter])]
+			g.programCounter = address
+		case compiler.JIF:
+			g.programCounter++
+			g.stackpointer--
+			if !toBool(g.stack[g.stackpointer]) {
+				address := counterTable[int(bytearray[g.programCounter])]
+				g.programCounter = address
+			} else {
+				g.programCounter++
+			}
+		case compiler.ADD, compiler.SUB, compiler.MUL, compiler.DIV:
+			ans=g.MathOps(opcode)
+		case compiler.GT, compiler.LT, compiler.GTE, compiler.LTE, compiler.EQ:
+			ans=g.Comparisons(opcode)
+		case compiler.AND, compiler.OR, compiler.TRUE, compiler.FALSE:
+			ans=g.BoolOps(opcode)
+		}
+	}
+	fmt.Println(g.stack)
+	return ans
+}
+
+
+func (g *GVM) MathOps(opcode int) int{
+	var ans int
+	switch compiler.Opcode(opcode) {
+	case compiler.ADD:
 		g.stackpointer--
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
@@ -33,7 +80,7 @@ func (g *GVM) MathOps(opcode int) {
 		g.stack[g.stackpointer] = ans
 		g.stackpointer++
 		g.programCounter++
-	case "SUB":
+	case compiler.SUB:
 		g.stackpointer--
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
@@ -42,7 +89,7 @@ func (g *GVM) MathOps(opcode int) {
 		g.stack[g.stackpointer] = ans
 		g.stackpointer++
 		g.programCounter++
-	case "MUL":
+	case compiler.MUL:
 		g.stackpointer--
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
@@ -51,7 +98,7 @@ func (g *GVM) MathOps(opcode int) {
 		g.stack[g.stackpointer] = ans
 		g.stackpointer++
 		g.programCounter++
-	case "DIV":
+	case compiler.DIV:
 		g.stackpointer--
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
@@ -61,12 +108,13 @@ func (g *GVM) MathOps(opcode int) {
 		g.stackpointer++
 		g.programCounter++
 	}
+	return ans
 }
 
-func (g *GVM) Comparisons(opcode int) {
+func (g *GVM) Comparisons(opcode int) int{
 	var ans int
-	switch compiler.OpName[opcode] {
-	case "GT":
+	switch compiler.Opcode(opcode) {
+	case compiler.GT:
 		g.stackpointer--
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
@@ -75,7 +123,7 @@ func (g *GVM) Comparisons(opcode int) {
 		g.stack[g.stackpointer] = ans
 		g.stackpointer++
 		g.programCounter++
-	case "LT":
+	case compiler.LT:
 		g.stackpointer--
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
@@ -84,7 +132,7 @@ func (g *GVM) Comparisons(opcode int) {
 		g.stack[g.stackpointer] = ans
 		g.stackpointer++
 		g.programCounter++
-	case "GTE":
+	case compiler.GTE:
 		g.stackpointer--
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
@@ -93,7 +141,7 @@ func (g *GVM) Comparisons(opcode int) {
 		g.stack[g.stackpointer] = ans
 		g.stackpointer++
 		g.programCounter++
-	case "LTE":
+	case compiler.LTE:
 		g.stackpointer--
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
@@ -102,7 +150,7 @@ func (g *GVM) Comparisons(opcode int) {
 		g.stack[g.stackpointer] = ans
 		g.stackpointer++
 		g.programCounter++
-	case "EQ":
+	case compiler.EQ:
 		g.stackpointer--
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
@@ -112,12 +160,13 @@ func (g *GVM) Comparisons(opcode int) {
 		g.stackpointer++
 		g.programCounter++
 	}
+	return ans
 }
 
-func (g *GVM) BoolOps(opcode int) {
+func (g *GVM) BoolOps(opcode int) int{
 	var ans int
-	switch compiler.OpName[opcode] {
-	case "AND":
+	switch compiler.Opcode(opcode) {
+	case compiler.AND:
 		g.stackpointer--
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
@@ -126,7 +175,7 @@ func (g *GVM) BoolOps(opcode int) {
 		g.stack[g.stackpointer] = ans
 		g.stackpointer++
 		g.programCounter++
-	case "OR":
+	case compiler.OR:
 		g.stackpointer--
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
@@ -135,63 +184,17 @@ func (g *GVM) BoolOps(opcode int) {
 		g.stack[g.stackpointer] = ans
 		g.stackpointer++
 		g.programCounter++
-	case "TRUE":
+	case compiler.TRUE:
 		g.stack[g.stackpointer] = toInt(true)
 		g.stackpointer++
 		g.programCounter++
-	case "FALSE":
+	case compiler.FALSE:
 		g.stack[g.stackpointer] = toInt(false)
 		g.stackpointer++
 		g.programCounter++
 	}
+	return  ans
 }
-
-func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
-	var ans int
-	for g.programCounter < len(bytearray) {
-		opcode := int(bytearray[g.programCounter])
-		switch compiler.OpName[opcode] {
-		case "PUSH":
-			g.programCounter++
-			number := counterTable[int(bytearray[g.programCounter])]
-			fmt.Println(number)
-			g.stack[g.stackpointer] = number
-			g.stackpointer++
-			g.programCounter++
-		case "NEQ":
-			g.stackpointer--
-			left := g.stack[g.stackpointer]
-			g.stackpointer--
-			right := g.stack[g.stackpointer]
-			ans = toInt(right != left)
-			g.stack[g.stackpointer] = ans
-			g.stackpointer++
-			g.programCounter++
-		case "JMP":
-			g.programCounter++
-			address := counterTable[int(bytearray[g.programCounter])]
-			g.programCounter = address
-		case "JIF":
-			g.programCounter++
-			g.stackpointer--
-			if !toBool(g.stack[g.stackpointer]) {
-				address := counterTable[int(bytearray[g.programCounter])]
-				g.programCounter = address
-			} else {
-				g.programCounter++
-			}
-		case "ADD", "SUB", "MUL", "DIV":
-			g.MathOps(opcode)
-		case "GT", "LT", "GTE", "LTE", "EQ":
-			g.Comparisons(opcode)
-		case "AND", "OR", "TRUE", "FALSE":
-			g.BoolOps(opcode)
-		}
-	}
-	fmt.Println(g.stack)
-	return ans
-}
-
 func toBool(val int) bool {
 	return val != 0
 }
