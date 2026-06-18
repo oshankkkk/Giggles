@@ -32,9 +32,10 @@ func Run(stack *[]int,stackpointer *int,heap *map[string]int){
 		lexer.ReadLine(input)
 		var parser parser.Parser
 		ast:=parser.Run(&lexer)
-		var comp compiler.Compiler
+		var comp compiler.State
 		var vm vm.GVM
-		bytecodelist:=comp.Compile(ast)
+		globalscope:=compiler.InitScope()
+		bytecodelist:=comp.ToBytes(ast,globalscope)
 		//bytearray,constTable,vartable:=compiler.(bytecodelist)	
 		ans := vm.Machine(bytecodelist, comp.CounterTable)
 		fmt.Println(ans)

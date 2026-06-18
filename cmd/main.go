@@ -32,11 +32,12 @@ func readscript(path string){
 	var parser parser.Parser
 	rootnode:=parser.Run(&lexer)	
 	prettyprinter(rootnode,0)
-		var comp compiler.Compiler
+		globalscope:=compiler.InitScope()
 		var vm vm.GVM
-		bytecodelist:=comp.Compile(rootnode)
+		var code compiler.State
+		bytecodelist:=code.ToBytes(rootnode,globalscope)
 		//bytearray,constTable,vartable:=compiler.(bytecodelist)	
-		ans := vm.Machine(bytecodelist, comp.CounterTable)
+		ans := vm.Machine(bytecodelist,code.CounterTable)
 		fmt.Println(ans)
 
 

@@ -9,6 +9,9 @@ type GVM struct {
 	programCounter int
 	stack          []int
 	stackpointer   int
+	scopepointer int
+	globalscope []int
+	//variable []int
 }
 
 func (g *GVM) debugPrint(opcode int) {
@@ -22,6 +25,9 @@ func (g *GVM) debugPrint(opcode int) {
 
 func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 	g.stack = make([]int, 1024)
+
+	fmt.Println(len(g.stack),"glen mmm")
+	//g.globalscope=make(map[string]int)	
 	var ans int
 	for g.programCounter < len(bytearray) {
 		opcode := int(bytearray[g.programCounter])
@@ -31,6 +37,20 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			g.programCounter++
 			number := counterTable[int(bytearray[g.programCounter])]
 			g.stack[g.stackpointer] = number
+			g.stackpointer++
+			g.programCounter++
+		case compiler.SETGLOBAL:
+			// the last push val is put in the global table
+			g.stackpointer--
+			g.globalscope = append(g.globalscope, g.stack[g.scopepointer])
+			fmt.Println(len(g.globalscope),"naman")
+			g.programCounter++
+		case compiler.GETGLOBAL:
+			// the values in the counter table should be the index of the global var
+			//pcounter is its index
+			g.programCounter++
+			fmt.Println(g.programCounter,"cucuc")
+			g.stack=append(g.stack,g.globalscope[int(bytearray[g.programCounter])])
 			g.stackpointer++
 			g.programCounter++
 		case compiler.NEQ:
@@ -49,9 +69,19 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 		case compiler.JIF:
 			g.programCounter++
 			g.stackpointer--
+	fmt.Println("alelalxxxxala")
 			if !toBool(g.stack[g.stackpointer]) {
+			
+	fmt.Println("aee33yylelalala")
+
+	fmt.Println(len(counterTable))
+	fmt.Println(g.programCounter)
+	
+	fmt.Println(len(bytearray),"dhdhdhbbb")
 				address := counterTable[int(bytearray[g.programCounter])]
 				g.programCounter = address
+
+		fmt.Println("alelalala")
 			} else {
 				g.programCounter++
 			}
@@ -112,6 +142,7 @@ func (g *GVM) MathOps(opcode int) int{
 }
 
 func (g *GVM) Comparisons(opcode int) int{
+	fmt.Println(len(g.stack),"glen")
 	var ans int
 	switch compiler.Opcode(opcode) {
 	case compiler.GT:
@@ -205,31 +236,17 @@ func toInt(val bool) int {
 	}
 	return 0
 }
-//	case "VAR_DEC":
-	//		programCounter++
-	//		*stackpointer--
-    //        globalvar:= varConstTable[int(bytearray[programCounter])]
-    //        (*heap)[globalvar] = (*stack)[*stackpointer]
-    //        programCounter++
-	//	case "VAR":
-	//		programCounter++
-	//		//var string index
-	//		ident:=varConstTable[int(bytearray[programCounter])]
-	//		//give the variable string(heap key)
-	//		value:=(*heap)[ident]
-	//		(*stack)[*stackpointer]=value
-	//		*stackpointer++
-	//		(*stack)[*stackpointer]=int(bytearray[programCounter])
-	//		*stackpointer++
-    //        programCounter++
-	//   case "ASS":
-	//	   	*stackpointer--
-	//		newval:=(*stack)[*stackpointer]
-	//	   	*stackpointer--
-	//		index:=(*stack)[*stackpointer]
-	//		ident:=varConstTable[index]
-	//		(*heap)[ident]=newval
-	//		*stackpointer++
-	//		programCounter++
 
+		//case compiler.SETLOCAL:
+		//case compiler.GETLOCAL:
+//			case compiler.ASS:
+//			*stackpointer--
+//			newval:=(*stack)[*stackpointer]
+//			*stackpointer--
+//			index:=(*stack)[*stackpointer]
+//			ident:=varConstTable[index]
+//			(*heap)[ident]=newval
+//			*stackpointer++
+//			programCounter++
+//
 

@@ -1,67 +1,109 @@
 package compiler
 
 import (
+	"fmt"
 	"lang/internal/lexer"
 	"lang/internal/parser"
 	"strconv"
 )
-
-type Compiler struct {
+type State struct {
 CounterTable  []int
 }
 
-func (c *Compiler) Compile(ast parser.ASTNode) []byte{
+func (c *State) checkTable(){}
+func (c *State) ToBytes(ast parser.ASTNode,scope *Scope) []byte{
 	var bytecode []byte
 	if value, ok := ast.(parser.Program); ok {
 		for _, val := range value.Statements {
-			bytecode = append(bytecode, c.Compile(val)...)
+			bytecode = append(bytecode, c.ToBytes(val,scope)...)
 		}
 	}
 	if value, ok := ast.(parser.ExprStatement); ok {
-		bytecode = append(bytecode, c.Compile(value.Expr)...)
+		bytecode = append(bytecode, c.ToBytes(value.Expr,scope)...)
 	}
 	if value, ok := ast.(parser.Groups); ok {
-		bytecode = append(bytecode, c.Compile(value.Value)...)
+		bytecode = append(bytecode, c.ToBytes(value.Value,scope)...)
 	}
-//	if value, ok := ast.(parser.VarDecl); ok {
-//		bytecode = append(bytecode, c.Compile(value.Value)...)
-//		bytecode = append(bytecode, byte(VAR_DEC), value.Name.Value)
-//	}
-//	if value, ok := ast.(parser.Identifier); ok {
-//		bytecode = append(bytecode, byte(VAR), value.Name.Value)
-//	}
+	
+	if value, ok := ast.(parser.VarDecl); ok {
+//check for scope and put the flat bytes here with pointer address and var table index
+//value	
+	bytecode = append(bytecode, c.ToBytes(value.Value,scope)...)
+// the variable name is after vardec
+		scope.AddVariable(value.Name.Value)
+		bytecode = append(bytecode, byte(SETGLOBAL))
+		//what this opcode does
+	}
+	if value, ok := ast.(parser.Identifier); ok {
+//get local/global
+		if info,ok:=scope.VarLookup(value.Name.Value);ok{
+			//this means the var is in the vm now
+		bytecode = append(bytecode, byte(GETGLOBAL),byte(info.id))
+	}else{
+		panic("var undefined")
+	}
+}
 	if value, ok := ast.(parser.Condition); ok {
 		condPos := len(bytecode)
-		bytecode = append(bytecode, c.Compile(value.Condition)...)
+		bytecode = append(bytecode, c.ToBytes(value.Condition,scope)...)
 		jifPos := len(bytecode)
-		bytecode = append(bytecode, byte(JIF), 0)
+		fmt.Println(len(c.CounterTable),"jejeje")
+		//placeholder 0 
+	 	bytecode = append(bytecode, byte(JIF), 0)
+		
 		resultCode := []byte{}
+		//local :=EnterScope(scope)
 		for _, r := range value.Result {
-			resultCode = append(resultCode, c.Compile(r)...)
+			resultCode = append(resultCode, c.ToBytes(r,scope)...)
 		}
 		bytecode = append(bytecode, resultCode...)
 		if value.Looped {
 			bytecode = append(bytecode, byte(JMP), byte(condPos))
 			elseCode := []byte{}
+
+			//local :=EnterScope(scope)
 			for _, e := range value.ElseResult {
-				elseCode = append(elseCode, c.Compile(e)...)
+				elseCode = append(elseCode, c.ToBytes(e,scope)...)
 			}
-			bytecode[jifPos+1] = byte(len(bytecode))
+			c.CounterTable=append(c.CounterTable,len(bytecode) )	
+			bytecode[jifPos+1] = byte(len(c.CounterTable)-1)
+
 			bytecode = append(bytecode, elseCode...)
 		} else if value.HasElse {
 			elseCode := []byte{}
+
+			//local :=EnterScope(scope)
 			for _, e := range value.ElseResult {
-				elseCode = append(elseCode, c.Compile(e)...)
+				elseCode = append(elseCode, c.ToBytes(e,scope)...)
 			}
 			jmpPos := len(bytecode)
+
 			bytecode = append(bytecode, byte(JMP), 0)
-			bytecode[jifPos+1] = byte(len(bytecode))
+
+//	bytecode[jifPos+1] = byte(len(bytecode))
+
+			c.CounterTable=append(c.CounterTable,len(bytecode) )	
+			bytecode[jifPos+1] = byte(len(c.CounterTable)-1)
+
+
 			bytecode = append(bytecode, elseCode...)
-			bytecode[jmpPos+1] = byte(len(bytecode))
+
+		//	bytecode[jmpPos+1] = byte(len(bytecode))
+
+			c.CounterTable=append(c.CounterTable,len(bytecode) )	
+			bytecode[jmpPos+1] = byte(len(c.CounterTable)-1)
+
+
 		} else {
-			bytecode[jifPos+1] = byte(len(bytecode))
+		c.CounterTable=append(c.CounterTable,len(bytecode) )	
+			bytecode[jifPos+1] = byte(len(c.CounterTable)-1)
+
+
+//			bytecode[jifPos+1] = byte(len(bytecode))
 		}
 	}
+
+
 	if value, ok := ast.(parser.Literal); ok {
 		if value.Value.Type == lexer.TRUE {
 			return append(bytecode, byte(TRUE))
@@ -76,8 +118,8 @@ func (c *Compiler) Compile(ast parser.ASTNode) []byte{
 		return append(bytecode, byte(PUSH), byte(len(c.CounterTable)-1))
 	}
 	if value, ok := ast.(parser.Binary); ok {
-		bytecode = append(bytecode, c.Compile(value.Left)...)
-		bytecode = append(bytecode, c.Compile(value.Right)...)
+		bytecode = append(bytecode, c.ToBytes(value.Left,scope)...)
+		bytecode = append(bytecode, c.ToBytes(value.Right,scope)...)
 		var opcode Opcode
 		switch value.Operator {
 		case lexer.MINUS:
@@ -109,6 +151,8 @@ func (c *Compiler) Compile(ast parser.ASTNode) []byte{
 		}
 		bytecode = append(bytecode, byte(opcode))
 	}
+
+
 	return bytecode
 }
 
@@ -135,6 +179,10 @@ const (
 	JMP
 	JIF
 	ASS
+	GETGLOBAL
+	SETGLOBAL
+	SETLOCAL
+	GETLOCAL
 )
 
 
