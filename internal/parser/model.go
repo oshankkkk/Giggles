@@ -10,6 +10,13 @@ type Program struct {
 	Statements []ASTNode
 }
 
+type Call struct {
+	Function string
+	Args     []ASTNode
+	Line     int
+	Column   int
+}
+
 type Literal struct {
 	Value    lexer.Token
 	Line     int
@@ -18,6 +25,7 @@ type Literal struct {
 
 type Identifier struct {
 	Name     lexer.Token
+	IsLocal  int
 	Line     int
 	Column   int
 }
@@ -48,7 +56,8 @@ type VarDecl struct {
 	Value    ASTNode
 	Line     int
 	Column   int
-	isConst bool
+	IsConst bool
+	IsLocal bool
 }
 
 type ExprStatement struct {
@@ -56,7 +65,13 @@ type ExprStatement struct {
 	Line   int
 	Column int
 }
-
+type Function struct{
+	Name string
+	Content []ASTNode
+	Line   int
+	Column int
+	isVoid bool
+}
 type Condition struct{
 	Condition ASTNode
 	HasElse bool
@@ -71,8 +86,10 @@ func (n Program) Expression()       {}
 func (n Literal) Expression()       {}
 func (n Identifier) Expression()    {}
 func (n Binary) Expression()        {}
+func (n Function) Expression()        {}
 func (n Unary) Expression()         {}
 func (n Groups) Expression()        {}
 func (n Condition) Expression()     {}
 func (n VarDecl) Expression()       {}
 func (n ExprStatement) Expression() {}
+func (n Call) Expression() {}

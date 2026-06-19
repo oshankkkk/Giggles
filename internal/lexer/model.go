@@ -42,7 +42,7 @@ const (
 	ELSE   TokenType = "ELSE"
 	THEN   TokenType = "THEN"
 	END    TokenType = "END"
-	FUNC   TokenType = "FUNC"
+	FN   TokenType = "FN"
 	LOCAL  TokenType = "LOCAL"
 	RETURN TokenType = "RETURN"
 	MUT TokenType = "MUT"
@@ -112,7 +112,7 @@ var keywordTokens=map[string]TokenType{
 	"else":     ELSE,
 	"then":     THEN,
 	"end":      END,
-	"func":     FUNC,
+	"fn":     FN,
 	"local":    LOCAL,
 	"return":   RETURN,
 

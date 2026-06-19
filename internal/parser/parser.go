@@ -65,23 +65,30 @@ func (p *Parser)statementparser() ASTNode {
 	if p.current.Type== lexer.TYPEDEFF{
 		return p.vardecparser()
 	}
-
 	return p.expstatement()
-
 }
 
 func (p *Parser)expstatement() ASTNode {
 	expr := p.parser(0)
-
 	return ExprStatement{Expr: expr, Line: p.current.Line, Column: p.current.Column}
 }
 
 
 func (p *Parser)vardecparser() ASTNode{
 	//we have to call the next token now
+
+	var typedeff lexer.Token
 	isConst := true
+	isLocal := false 
+	scope:=p.nextToken()
+	if scope.Type==lexer.LOCAL{
+		isLocal = true 
+		typedeff=p.nextToken()
+	}else{
+		typedeff=scope
+	}
 	var varName lexer.Token
-	typedeff:=p.nextToken()
+	//typedeff:=p.nextToken()
 	//ok:=lexer.next(*token) 		
 
 	if !(p.current.Type == lexer.IDENTIFIER || p.current.Type ==lexer.MUT) {
@@ -115,11 +122,12 @@ func (p *Parser)vardecparser() ASTNode{
 		Value:    val,
 		Line: varName.Line,
 		Column:   varName.Column,
-		isConst: isConst,
-		}
-
+		IsConst: isConst,
+		IsLocal: isLocal,
+	}
 
 }
+
 func (p *Parser) parseStart() ASTNode {
 	fmt.Println(p.current.Value)
 
@@ -133,25 +141,65 @@ func (p *Parser) parseStart() ASTNode {
 		return node
 	}
 
-	if p.current.Type == lexer.IDENTIFIER {
-		old:=p.nextToken()
-	if value,ok:=p.symboltb[old.Value];ok{
-		if value==true && p.current.Type==lexer.EQUAL{
-				panic("const var cant be mutated, gotta use the mut keyword")
-			}else{
-	
-		node := Identifier{
-			Name: old,
-			Line: old.Line,
-			Column: old.Column,
+	if p.current.Type == lexer.FN {
+		token := p.nextToken()
+		line := token.Line
+		col := token.Column
+		funcname := p.nextToken()
+		var content []ASTNode
+		for p.current.Type != lexer.END {
+			content = append(content, p.statementparser())
 		}
-		return node
-			}
-		}else{
-			panic("var not defined")
+		if p.current.Type == lexer.END {
+			p.nextToken()
+		} else {
+			panic(fmt.Sprintf("expected 'end' for fn block at Line %d", token.Line))
+		}
+		return Function{
+			Name:    funcname.Value,
+			Content: content,
+			Line:    line,
+			Column:  col,
 		}
 	}
 
+	if p.current.Type == lexer.IDENTIFIER {
+		name := p.current
+		p.nextToken()
+
+		// function call: identifier followed by '('
+		if p.current.Type == lexer.LEFT_PAREN {
+			p.nextToken() // consume '('
+			var args []ASTNode
+			for p.current.Type != lexer.RIGHT_PAREN {
+				args = append(args, p.parser(0))
+				if p.current.Type == lexer.COMMA {
+					p.nextToken() // consume ',' between args
+				}
+			}
+			p.nextToken() // consume ')'
+			return Call{
+				Function: name.Value,
+				Args:     args,
+				Line:     name.Line,
+				Column:   name.Column,
+			}
+		}
+
+		// plain identifier
+		value, ok := p.symboltb[name.Value]
+		if !ok {
+			panic("var not defined")
+		}
+		if value == true && p.current.Type == lexer.EQUAL {
+			panic("const var cant be mutated, gotta use the mut keyword")
+		}
+		return Identifier{
+			Name:   name,
+			Line:   name.Line,
+			Column: name.Column,
+		}
+	}
 	if p.current.Type == lexer.ILLEGAL{
 		panic(fmt.Sprintf("expected '%s' at Line %d", p.current.Value,p.current.Line))
 	}
@@ -180,6 +228,7 @@ func (p *Parser) parseStart() ASTNode {
 		}
 	}
 
+
 	if p.current.Type == lexer.IF || p.current.Type==lexer.FOR{
 		var isLooped bool
 		if p.current.Type==lexer.FOR{
@@ -190,9 +239,7 @@ func (p *Parser) parseStart() ASTNode {
 		col := token.Column
 
 		p.nextToken() // move into condition
-
 		condition := p.parser(0)
-		
 		isBlock := false
 		if p.current.Type == lexer.THEN {
 			isBlock = true
