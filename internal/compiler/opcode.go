@@ -1,0 +1,37 @@
+package compiler
+
+type Opcode int
+
+const (
+	PUSH Opcode = iota + 1
+	ADD
+	SUB
+	MUL
+	DIV
+	VAR_DEC
+	VAR
+	AND
+	OR
+	TRUE
+	FALSE
+	GT
+	LT
+	GTE
+	LTE
+	EQ
+	NEQ
+	JMP
+	JIF
+	ASS
+	GETGLOBAL
+	SETGLOBAL
+	SETLOCAL
+	GETLOCAL
+	//ENTERFUNC
+	//RETURN
+	CALLFUNC
+	STOP
+
+)
+
+

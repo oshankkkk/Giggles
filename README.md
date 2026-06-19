@@ -1,15 +1,15 @@
 # Giggles
 
 #### TODOS
-- type system
-- string support
-- if-then syntax sugar with end
-- make all variables cons by default
-- make all var global by default
-- local keyword for local vars
-- scope handling
-- func support
-- print() and scanner() functions in stdlib
+- [ ] type system
+- [ ] string support
+- [ ] print() and scanner() functions in stdlib
+- [x] if-then syntax sugar with end
+- [x] make all variables cons by default
+- [x] make all var global by default
+- [ ] func support
+- [ ] local keyword for local vars
+- [ ] scope handling
 
 
 ## A toy interpreter 

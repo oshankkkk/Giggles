@@ -4,7 +4,6 @@ type Variable struct {
 	id int
 	Name  string
 	//Type 
-			
 }
 
 type Scope struct {

@@ -11,6 +11,7 @@ type GVM struct {
 	stackpointer   int
 	scopepointer int
 	globalscope []int
+	basepointer int 
 	//variable []int
 }
 
@@ -25,9 +26,8 @@ func (g *GVM) debugPrint(opcode int) {
 
 func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 	g.stack = make([]int, 1024)
-
-	fmt.Println(len(g.stack),"glen mmm")
 	//g.globalscope=make(map[string]int)	
+
 	var ans int
 	for g.programCounter < len(bytearray) {
 		opcode := int(bytearray[g.programCounter])
@@ -39,17 +39,25 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			g.stack[g.stackpointer] = number
 			g.stackpointer++
 			g.programCounter++
+//		case compiler.CALLFUNC:
+//			g.stack[g.stackpointer]=g.basepointer
+//			g.basepointer=g.stackpointer
+//		case compiler.SETLOCAL:
+//			g.stackpointer--
+//		case compiler.GETLOCAL:
+			//g.programCounter++
+			//g.stack=append(g.stack,g.globalscope[int(bytearray[g.programCounter])])
+			//g.stackpointer++
+			//g.programCounter++
 		case compiler.SETGLOBAL:
 			// the last push val is put in the global table
 			g.stackpointer--
-			g.globalscope = append(g.globalscope, g.stack[g.scopepointer])
-			fmt.Println(len(g.globalscope),"naman")
+			g.globalscope = append(g.globalscope, g.stack[g.stackpointer])
 			g.programCounter++
 		case compiler.GETGLOBAL:
 			// the values in the counter table should be the index of the global var
 			//pcounter is its index
 			g.programCounter++
-			fmt.Println(g.programCounter,"cucuc")
 			g.stack=append(g.stack,g.globalscope[int(bytearray[g.programCounter])])
 			g.stackpointer++
 			g.programCounter++
@@ -69,19 +77,9 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 		case compiler.JIF:
 			g.programCounter++
 			g.stackpointer--
-	fmt.Println("alelalxxxxala")
 			if !toBool(g.stack[g.stackpointer]) {
-			
-	fmt.Println("aee33yylelalala")
-
-	fmt.Println(len(counterTable))
-	fmt.Println(g.programCounter)
-	
-	fmt.Println(len(bytearray),"dhdhdhbbb")
 				address := counterTable[int(bytearray[g.programCounter])]
 				g.programCounter = address
-
-		fmt.Println("alelalala")
 			} else {
 				g.programCounter++
 			}
@@ -91,6 +89,12 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			ans=g.Comparisons(opcode)
 		case compiler.AND, compiler.OR, compiler.TRUE, compiler.FALSE:
 			ans=g.BoolOps(opcode)
+		case compiler.STOP:
+			break
+
+//		case compiler.RETURN:
+//			g.stackpointer=g.framepointer
+//
 		}
 	}
 	fmt.Println(g.stack)
