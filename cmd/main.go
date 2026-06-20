@@ -89,7 +89,7 @@ func prettyprinter(ex parser.ASTNode, indent int) {
 		}
 
 	case parser.Function:
-		fmt.Printf("%sFuncDeff\n", pad)
+		fmt.Printf("%sFuncDeff(%s)\n", pad,n.Name)
 		for _, s := range n.Content{
 			prettyprinter(s, indent+1)
 		}

@@ -163,7 +163,7 @@ func (p *Parser) parseStart() ASTNode {
 		}
 	}
 
-	if p.current.Type == lexer.IDENTIFIER {
+	if p.current.Type == lexer.IDENTIFIER || p.current.Type==lexer.MAIN {
 		name := p.current
 		p.nextToken()
 

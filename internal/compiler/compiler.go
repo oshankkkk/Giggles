@@ -12,6 +12,7 @@ type State struct {
 	CounterTable  []int
 	symboltb map[string]int
 	fixups []fixup
+	Entrypoint int
 }
 type fixup struct{
 	address int
@@ -19,12 +20,16 @@ type fixup struct{
 }
 func (c *State) Wrapper(ast parser.ASTNode,scope *Scope)[]byte{
 	c.symboltb=make(map[string]int)
-	bytelist:=c.ToBytes(ast,scope)	
+	var bytelist []byte
+	b:=c.ToBytes(ast,scope)
+	bytelist = append(bytelist, byte(JMP),byte(c.Entrypoint))
+	bytelist=append(bytelist,b...)	
+	bytelist = append(bytelist, byte(STOP))
 	return  bytelist
 }
 func (c *State) ToBytes(ast parser.ASTNode,scope *Scope) []byte{
 	var bytecode []byte
-
+	
 	if value, ok := ast.(parser.Program); ok {
 		for _, val := range value.Statements {
 			bytecode = append(bytecode, c.ToBytes(val,scope)...)
@@ -41,26 +46,23 @@ func (c *State) ToBytes(ast parser.ASTNode,scope *Scope) []byte{
 		//check for scope and put the flat bytes here with pointer address and var table index value	
 		bytecode = append(bytecode, c.ToBytes(value.Value,scope)...)
 		// the variable name is after vardec
-		fmt.Println("fhf")	
 		v:=scope.AddVariable(value.Name.Value)
 
 		c.CounterTable=append(c.CounterTable,v.id )	
 		bytecode = append(bytecode, byte(SETGLOBAL),byte(len(c.CounterTable)-1))
-
 		//		bytecode = append(bytecode, byte(SETGLOBAL))
 		//what this opcode does
 	}
 
 	if value, ok := ast.(parser.Identifier); ok {
+		fmt.Println("ee343")
 		//get local/global
 		if info,ok:=scope.VarLookup(value.Name.Value);ok{
-			fmt.Println("fhf")	
 			//this means the var is in the vm now
 
 			c.CounterTable=append(c.CounterTable,info.id )	
 			fmt.Println(c.CounterTable)	
 			bytecode = append(bytecode, byte(GETGLOBAL),byte(len(c.CounterTable)-1))
-			fmt.Println("fhf")	
 
 		}else{
 
@@ -70,11 +72,15 @@ func (c *State) ToBytes(ast parser.ASTNode,scope *Scope) []byte{
 
 	if value, ok := ast.(parser.Call); ok {
 		bytecode = append(bytecode, byte(NWFRM))
+
 		funcjmp:=len(bytecode)+1
 		bytecode = append(bytecode, byte(JMP),0)
 
 		if fnaddress,ok:=c.symboltb[value.Function];ok{
-			bytecode[funcjmp]=byte(fnaddress)
+
+		c.CounterTable=append(c.CounterTable,fnaddress)	
+		bytecode[funcjmp] =  byte(len(c.CounterTable)-1)
+			
 		}else{
 			c.fixups = append(c.fixups, fixup{address: funcjmp,funname: value.Function})	
 		}
@@ -82,6 +88,9 @@ func (c *State) ToBytes(ast parser.ASTNode,scope *Scope) []byte{
 		//we check for the function if its not there, we will keep in touch.
 	}
 	if value, ok := ast.(parser.Function); ok {
+		if value.Name==string(lexer.MAIN){
+		c.Entrypoint=len(bytecode)
+		}
 		c.symboltb[value.Name]=len(bytecode)
 		for _,n:=range value.Content{
 			bytecode = append(bytecode, c.ToBytes(n,scope)...)
@@ -107,12 +116,10 @@ func (c *State) ToBytes(ast parser.ASTNode,scope *Scope) []byte{
 		if value.Looped {
 			bytecode = append(bytecode, byte(JMP), byte(condPos))
 			elseCode := []byte{}
-
 			//local :=EnterScope(scope)
 			for _, e := range value.ElseResult {
 				elseCode = append(elseCode, c.ToBytes(e,scope)...)
 			}
-
 			c.CounterTable=append(c.CounterTable,len(bytecode) )	
 			bytecode[jifPos+1] = byte(len(c.CounterTable)-1)
 
@@ -201,8 +208,6 @@ func (c *State) ToBytes(ast parser.ASTNode,scope *Scope) []byte{
 
 		bytecode = append(bytecode, byte(opcode))
 	}
-
-
 	return bytecode
 }
 func (c *State) Fixpatchs(bytecode []byte)(error,[]byte){
