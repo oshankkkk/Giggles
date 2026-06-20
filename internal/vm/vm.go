@@ -31,6 +31,7 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 	var ans int
 	for g.programCounter < len(bytearray) {
 		opcode := int(bytearray[g.programCounter])
+		fmt.Println(len(bytearray),"barray",g.programCounter,"pcpunter")
 		g.debugPrint(opcode)
 		switch compiler.Opcode(opcode) {
 		case compiler.PUSH:
@@ -39,27 +40,34 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			g.stack[g.stackpointer] = number
 			g.stackpointer++
 			g.programCounter++
-//		case compiler.CALLFUNC:
-//			g.stack[g.stackpointer]=g.basepointer
-//			g.basepointer=g.stackpointer
-//		case compiler.SETLOCAL:
-//			g.stackpointer--
-//		case compiler.GETLOCAL:
-			//g.programCounter++
-			//g.stack=append(g.stack,g.globalscope[int(bytearray[g.programCounter])])
-			//g.stackpointer++
-			//g.programCounter++
+		case compiler.NWFRM:
+			g.stack[g.stackpointer]=g.basepointer
+			g.stackpointer++
+			g.basepointer=g.stackpointer
+
 		case compiler.SETGLOBAL:
-			// the last push val is put in the global table
+			g.programCounter++  // move past opcode to read the index
+			idx := counterTable[int(bytearray[g.programCounter])]
 			g.stackpointer--
-			g.globalscope = append(g.globalscope, g.stack[g.stackpointer])
+			// grow slice if needed (first time declaring)
+			for len(g.globalscope) <= idx {
+				g.globalscope = append(g.globalscope, 0)
+			}
+			g.globalscope[idx] = g.stack[g.stackpointer]
 			g.programCounter++
 		case compiler.GETGLOBAL:
 			// the values in the counter table should be the index of the global var
 			//pcounter is its index
 			g.programCounter++
-			g.stack=append(g.stack,g.globalscope[int(bytearray[g.programCounter])])
+			g.stack[g.stackpointer]=g.globalscope[counterTable[int(bytearray[g.programCounter])]]
 			g.stackpointer++
+			g.programCounter++
+		case compiler.ASS:
+			g.programCounter++
+			idx := counterTable[int(bytearray[g.programCounter])]
+			g.stackpointer--                        
+			right := g.stack[g.stackpointer]        
+			g.globalscope[idx] = right
 			g.programCounter++
 		case compiler.NEQ:
 			g.stackpointer--
@@ -91,10 +99,11 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			ans=g.BoolOps(opcode)
 		case compiler.STOP:
 			break
-
-//		case compiler.RETURN:
-//			g.stackpointer=g.framepointer
-//
+		default:
+			fmt.Println("no assignemnt opecode you idoit")
+			//		case compiler.RETURN:
+			//			g.stackpointer=g.framepointer
+			//
 		}
 	}
 	fmt.Println(g.stack)
@@ -243,14 +252,5 @@ func toInt(val bool) int {
 
 		//case compiler.SETLOCAL:
 		//case compiler.GETLOCAL:
-//			case compiler.ASS:
-//			*stackpointer--
-//			newval:=(*stack)[*stackpointer]
-//			*stackpointer--
-//			index:=(*stack)[*stackpointer]
-//			ident:=varConstTable[index]
-//			(*heap)[ident]=newval
-//			*stackpointer++
-//			programCounter++
-//
+
 

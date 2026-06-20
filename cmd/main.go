@@ -35,7 +35,11 @@ func readscript(path string){
 		globalscope:=compiler.InitScope()
 		var vm vm.GVM
 		var code compiler.State
-		bytecodelist:=code.ToBytes(rootnode,globalscope)
+		bytecodelist:=code.Wrapper(rootnode,globalscope)
+		var err error
+		if err,bytecodelist=code.Fixpatchs(bytecodelist);err!=nil{
+			fmt.Println(err)
+		}
 		//bytearray,constTable,vartable:=compiler.(bytecodelist)	
 		ans := vm.Machine(bytecodelist,code.CounterTable)
 		fmt.Println(ans)

@@ -1,0 +1,7 @@
+fn foo
+    int a = 2
+end
+
+fn main
+    foo()
+end

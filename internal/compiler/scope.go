@@ -39,12 +39,15 @@ func (s *Scope) LeaveScope() *Scope {
 }
 
 // AddVariable defines a variable in the CURRENT scope only
-func (s *Scope) AddVariable(name string) {
+func (s *Scope) AddVariable(name string)Variable {
 	
-	s.locals[name] = Variable{Name: name, id: s.varcounter}
+	v:= Variable{Name: name, id: s.varcounter}
+
+	s.locals[name] =v
 	fmt.Println("idid",s.varcounter)
 
 	s.varcounter++
+	return  v
 }
 
 // VarLookup walks up the scope chain to find a variable by name
