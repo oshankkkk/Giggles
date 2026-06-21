@@ -23,7 +23,11 @@ func (g *GVM) debugPrint(opcode int) {
 		"STACK:", g.stack[:g.stackpointer],
 	)
 }
-
+func (g *GVM) debugStack(vmop string) {
+	fmt.Println(vmop)
+    fmt.Printf(" SP=%-4d  BP=%-4d  stack[BP:SP]=%v\n",
+         g.stackpointer, g.basepointer, g.stack[g.basepointer:g.stackpointer])
+}
 func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 	g.stack = make([]int, 1024)
 	//g.globalscope=make(map[string]int)	
@@ -33,9 +37,9 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 	for g.programCounter < len(bytearray) {
 		
 		opcode := int(bytearray[g.programCounter])
-		//fmt.Println(len(bytearray),"barray",g.programCounter,"pcpunter")
-//		fmt.Println(g.basepointer,"bp",g.stackpointer,"sp")
-		//g.debugPrint(opcode)
+		//	fmt.Println(len(bytearray),"barray",g.programCounter,"pcpunter")
+		//		fmt.Println(g.basepointer,"bp",g.stackpointer,"sp")
+		g.debugPrint(opcode)
 		switch compiler.Opcode(opcode) {
 		case compiler.PUSH:
 			g.programCounter++
@@ -44,17 +48,40 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			g.stackpointer++
 			g.programCounter++
 		case compiler.NWFRM:
-			g.stack[g.stackpointer]=g.basepointer
+			// Layout: [saved_bp][return_addr] then locals above BP
+			g.stack[g.stackpointer] = g.basepointer
 			g.stackpointer++
-			g.basepointer=g.stackpointer
+			g.basepointer = g.stackpointer
 			g.programCounter++
+
 		case compiler.RMFRM:
-			g.stackpointer=g.basepointer
-			g.stackpointer--
-			fmt.Println(g.stackpointer)
-			g.basepointer=g.stack[g.stackpointer]
+			// Grab return address pushed just after NWFRM
+			retAddr := g.stack[g.basepointer] 
+			g.stackpointer = g.basepointer - 1  // unwind locals + saved bp slot
+			g.basepointer = g.stack[g.basepointer-1] // restore caller's BP
+			g.programCounter = retAddr           
+//		case compiler.NWFRM:
+//			fmt.Println("newframe happends",g.stackpointer)
+//			g.stack[g.stackpointer]=g.basepointer
+//			g.stackpointer++
+//			g.basepointer=g.stackpointer
+//			g.programCounter++
+//			g.debugStack("new stack op")
+//		case compiler.RMFRM:
+//			fmt.Println("rmstack happend befor rm",g.stackpointer,g.basepointer)
+//			g.stackpointer=g.basepointer
+//
+//			fmt.Println("after same as basepointer",g.stackpointer,g.basepointer)
+//			g.stackpointer--
+//
+//			fmt.Println("after -1 deduct from stackpointer",g.stackpointer,g.basepointer)
+//			//fmt.Println(g.stackpointer)
+//			g.basepointer=g.stack[g.stackpointer]
+//			fmt.Println("after stack base value interchange",g.stackpointer,g.basepointer)
+//			g.programCounter++
 			//g.stackpointer=g.stack[g.basepointer]
 			//g.basepointer=g.stackpointer
+			//g.debugStack("remove stack op")
 		case compiler.SETGLOBAL:
 			g.programCounter++  // move past opcode to read the index
 			idx := counterTable[int(bytearray[g.programCounter])]
@@ -90,13 +117,11 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			g.programCounter++
 		case compiler.JMP:
 			g.programCounter++
-			fmt.Println("func jump")
 			by:=bytearray[g.programCounter]
-			fmt.Println(int(by),"iiii")
 			address := counterTable[int(by)]
-
+			//fmt.Println()
 			g.programCounter = address
-
+			//fmt.Println(int(bytearray[ g.programCounter]),"jmp statement")
 		case compiler.JIF:
 			g.programCounter++
 			g.stackpointer--
@@ -113,9 +138,9 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 		case compiler.AND, compiler.OR, compiler.TRUE, compiler.FALSE:
 			ans=g.BoolOps(opcode)
 		case compiler.STOP:
-			break
-//		default:
-//			fmt.Println("no assignemnt for %s opecode you idoit",compiler.Opcode(opcode))
+			return ans
+		default:
+			fmt.Printf("no assignemnt for %s opecode you idoit\n",compiler.Opcode(opcode))
 			//		case compiler.RETURN:
 			//			g.stackpointer=g.framepointer
 			//
@@ -131,9 +156,8 @@ func (g *GVM) MathOps(opcode int) int{
 	var ans int
 	switch compiler.Opcode(opcode) {
 	case compiler.ADD:
-
-		fmt.Println("foooooookay")
 		g.stackpointer--
+		fmt.Println("add happends ")
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
 		right := g.stack[g.stackpointer]
@@ -173,7 +197,6 @@ func (g *GVM) MathOps(opcode int) int{
 }
 
 func (g *GVM) Comparisons(opcode int) int{
-	fmt.Println(len(g.stack),"glen")
 	var ans int
 	switch compiler.Opcode(opcode) {
 	case compiler.GT:

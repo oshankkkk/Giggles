@@ -40,6 +40,7 @@ type Binary struct {
 
 type Unary struct {
 	Value    ASTNode
+	Operator lexer.TokenType
 	Line     int
 	Column   int
 }
@@ -67,6 +68,7 @@ type ExprStatement struct {
 }
 type Function struct{
 	Name string
+	Ismain bool
 	Content []ASTNode
 	Line   int
 	Column int

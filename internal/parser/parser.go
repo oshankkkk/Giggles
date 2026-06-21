@@ -155,12 +155,23 @@ func (p *Parser) parseStart() ASTNode {
 		} else {
 			panic(fmt.Sprintf("expected 'end' for fn block at Line %d", token.Line))
 		}
+		if funcname.Type==lexer.MAIN{
+			return Function{
+			Name:    funcname.Value,
+			Ismain: true,
+			Content: content,
+			Line:    line,
+			Column:  col,
+		}
+
+		}else{
 		return Function{
 			Name:    funcname.Value,
 			Content: content,
 			Line:    line,
 			Column:  col,
 		}
+}
 	}
 
 	if p.current.Type == lexer.IDENTIFIER || p.current.Type==lexer.MAIN {
@@ -288,7 +299,18 @@ func (p *Parser) parseStart() ASTNode {
 			Column:      col,
 		}
 	}
-panic("eeeeehdhdhd")
+	if p.current.Type == lexer.MINUS || p.current.Type == lexer.NOT {
+		op := p.current
+		p.nextToken()
+		value := p.parser(100) // Assuming Unary operator has precedence 100
+		return Unary{
+			Value: value,
+			Operator: op.Type,
+			Line: op.Line,
+			Column: op.Column,
+		}
+	}
+	panic(fmt.Sprintf("unexpected token: %s at line %d column %d", p.current.Type, p.current.Line, p.current.Column))
 }
 
 func (p *Parser) parser(minBp int) ASTNode {

@@ -60,7 +60,7 @@ func Disassemble(bytearray []byte, counterTable []int) {
 				if idx < len(counterTable) {
 					val = counterTable[idx]
 				}
-				fmt.Printf(" [Idx: %d -> Val/Addr: %d]\n", idx, val)
+				fmt.Printf(" [byteIdx: %d -> countertablevalue: %d]\n", idx, val)
 			} else {
 				fmt.Printf(" [MISSING OPERAND]\n")
 			}
