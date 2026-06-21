@@ -35,9 +35,9 @@ func Run(stack *[]int,stackpointer *int,heap *map[string]int){
 		var comp compiler.State
 		var vm vm.GVM
 		globalscope:=compiler.InitScope()
-		bytecodelist:=comp.ToBytes(ast,globalscope)
+		comp.Wrapper(ast,globalscope)
 		//bytearray,constTable,vartable:=compiler.(bytecodelist)	
-		ans := vm.Machine(bytecodelist, comp.CounterTable)
+		ans := vm.Machine(comp.Buff, comp.CounterTable)
 		fmt.Println(ans)
 
 	}

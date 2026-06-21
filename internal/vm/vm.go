@@ -34,8 +34,8 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 		
 		opcode := int(bytearray[g.programCounter])
 		//fmt.Println(len(bytearray),"barray",g.programCounter,"pcpunter")
-//		fmt.Println(g.basepointer,"bp",g.stackpointer,"sp")
-		//g.debugPrint(opcode)
+		//fmt.Println(g.basepointer,"bp",g.stackpointer,"sp")
+//		g.debugPrint(opcode)
 		switch compiler.Opcode(opcode) {
 		case compiler.PUSH:
 			g.programCounter++
@@ -90,13 +90,12 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			g.programCounter++
 		case compiler.JMP:
 			g.programCounter++
-			fmt.Println("func jump")
+			fmt.Println("func jump",g.programCounter)
 			by:=bytearray[g.programCounter]
 			fmt.Println(int(by),"iiii")
 			address := counterTable[int(by)]
-
+			fmt.Println(address,"address") // this is 1
 			g.programCounter = address
-
 		case compiler.JIF:
 			g.programCounter++
 			g.stackpointer--
@@ -113,7 +112,7 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 		case compiler.AND, compiler.OR, compiler.TRUE, compiler.FALSE:
 			ans=g.BoolOps(opcode)
 		case compiler.STOP:
-			break
+			return ans
 //		default:
 //			fmt.Println("no assignemnt for %s opecode you idoit",compiler.Opcode(opcode))
 			//		case compiler.RETURN:
