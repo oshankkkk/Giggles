@@ -27,10 +27,16 @@ func main(){
 }
 
 func readscript(path string){
-	var lexer lexer.Lexer
-	lexer.ReadFile(path)
+	var lex lexer.Lexer
+	lex.ReadFile(path)
+
+	var debugLexer lexer.Lexer
+
+	parser.DebugTokens(&debugLexer) // drains it, prints all tokens
+
+
 	var parser parser.Parser
-	rootnode:=parser.Run(&lexer)	
+	rootnode:=parser.Run(&lex)	
 	prettyprinter(rootnode,0)
 		globalscope:=compiler.InitScope()
 		var vm vm.GVM

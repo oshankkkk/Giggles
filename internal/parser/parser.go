@@ -107,6 +107,8 @@ func (p *Parser)vardecparser() ASTNode{
 
 	if p.current.Type != lexer.EQUAL {
 		panic(fmt.Sprintf("expected '=' but found '%s' at Line %d", varName.Value, varName.Line))
+	}else{
+		fmt.Println("euqla innahwa")
 	}
 
 	p.nextToken()
@@ -343,4 +345,16 @@ func (p *Parser) parser(minBp int) ASTNode {
 		}
 	}
 	return node
+}
+
+func DebugTokens(l *lexer.Lexer) {
+	fmt.Println("=== TOKEN STREAM ===")
+	for {
+		tok := l.NextToken()
+		fmt.Printf("[%d:%d]\t%-20s %q\n", tok.Line, tok.Column, tok.Type, tok.Value)
+		if tok.Type == lexer.EOF {
+			break
+		}
+	}
+	fmt.Println("====================")
 }

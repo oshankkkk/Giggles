@@ -1,6 +1,5 @@
-int mut a=3
-a=a+1
-
-
+fn main
+local int a=3+3
+end
 
 

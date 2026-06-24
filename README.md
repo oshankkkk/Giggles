@@ -4,12 +4,12 @@
 - [ ] type system
 - [ ] string support
 - [ ] print() and scanner() functions in stdlib
+-[ ]arg support 
+- [ ] return values
 - [x] if-then syntax sugar with end
 - [x] make all variables cons by default
 - [x] make all var global by default
--[ ]arg support 
-- [ ] return values
-- [ ] local keyword for local vars
+- [x] local keyword for local vars
 - [x] scope handling
 
 

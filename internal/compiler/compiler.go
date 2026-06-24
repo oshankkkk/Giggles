@@ -40,9 +40,31 @@ func (c *State) ToBytes(ast parser.ASTNode, scope *Scope) {
 	if value, ok := ast.(parser.Groups); ok {
 		c.ToBytes(value.Value, scope)
 	}
+//if value, ok := ast.(parser.VarDecl); ok {
+//    c.ToBytes(value.Value, scope)
+//    value.Address = len(c.Buff)
+//
+//    if !value.IsLocal {
+//        // globals unchanged
+//        c.globals[value.GetName()] = value
+//        c.CounterTable = append(c.CounterTable, value.Address)
+//        c.Buff = append(c.Buff, byte(SETGLOBAL), byte(len(c.CounterTable)-1))
+//    } else {
+//        if existing, ok := scope.VarLookup(value.GetName()); ok {
+//            // REASSIGNMENT — slot already exists, just write into it
+//            c.CounterTable = append(c.CounterTable, existing.GetAddress())
+//            c.Buff = append(c.Buff, byte(SETLOCAL), byte(len(c.CounterTable)-1))
+//        } else {
+//            // DECLARATION — allocate new slot
+//            scope.AddSymbol(value)
+//            c.CounterTable = append(c.CounterTable, value.Address) // <-- was missing
+//            c.Buff = append(c.Buff, byte(SETLOCAL), byte(len(c.CounterTable)-1))
+//        }
+//    }
+//}
+	//assign values, and also declar them
 	if value, ok := ast.(parser.VarDecl); ok {
 		c.ToBytes(value.Value, scope)
-
 		value.Address=len(c.Buff)
 		c.CounterTable = append(c.CounterTable, value.Address)
 		if !value.IsLocal{
@@ -51,9 +73,10 @@ func (c *State) ToBytes(ast parser.ASTNode, scope *Scope) {
 			c.Buff = append(c.Buff, byte(SETGLOBAL), byte(len(c.CounterTable)-1))
 		}else{
 			scope.AddSymbol(value)
-			//c.Buff = append(c.Buff, byte(SETLOCAL), byte(len(c.CounterTable)-1))
+			c.Buff = append(c.Buff, byte(SETLOCAL), byte(len(c.CounterTable)-1))
 		} 
 	}
+
 	if value, ok := ast.(parser.Identifier); ok {
 		if info, ok := scope.VarLookup(value.Name.Value); ok {
 				//the address of the push
@@ -104,9 +127,9 @@ func (c *State) ToBytes(ast parser.ASTNode, scope *Scope) {
 		for _, n := range value.Content {
 			c.ToBytes(n,local)
 		}
-
 		c.Buff = append(c.Buff, byte(RMFRM))
-	} }
+	} 
+}
 	if value, ok := ast.(parser.Condition); ok {
 		condPos := len(c.Buff)
 		c.ToBytes(value.Condition, scope)
@@ -167,7 +190,10 @@ func (c *State) ToBytes(ast parser.ASTNode, scope *Scope) {
 		c.Buff = append(c.Buff, byte(PUSH), byte(len(c.CounterTable)-1))
 	}
 	if value, ok := ast.(parser.Binary); ok {
+
 		if value.Operator == lexer.EQUAL {
+
+			fmt.Println("ealalal{")
 			c.ToBytes(value.Right, scope)
 			if variable, ok := scope.VarLookup(value.Left.(parser.Identifier).Name.Value); ok {
 				c.CounterTable = append(c.CounterTable, variable.GetAddress())
