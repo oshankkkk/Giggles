@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	//"go/constant"
 	"lang/internal/lexer"
 )
 
@@ -11,10 +10,10 @@ type Parser struct {
 	current lexer.Token
 	lexer *lexer.Lexer
 	symboltb map[string]bool
+	idcounter int
 }
 
 var bpmap = map[lexer.TokenType]int{
-
 	lexer.STAR: 50,
 	lexer.SLASH: 50,
 
@@ -76,7 +75,7 @@ func (p *Parser)expstatement() ASTNode {
 
 func (p *Parser)vardecparser() ASTNode{
 	//we have to call the next token now
-
+	
 	var typedeff lexer.Token
 	isConst := true
 	isLocal := false 
@@ -115,7 +114,7 @@ func (p *Parser)vardecparser() ASTNode{
 	val := p.parser(0)
 	fmt.Println("var is made")
 	p.symboltb[varName.Value]=isConst
-
+	p.idcounter++
 	return 	VarDecl{
 		Typedeff:typedeff.Value,
 		Name: varName,
@@ -142,6 +141,8 @@ func (p *Parser) parseStart() ASTNode {
 	}
 
 	if p.current.Type == lexer.FN {
+
+		p.idcounter++
 		token := p.nextToken()
 		line := token.Line
 		col := token.Column
@@ -157,6 +158,7 @@ func (p *Parser) parseStart() ASTNode {
 		}
 		if funcname.Type==lexer.MAIN{
 			return Function{
+
 			Name:    funcname.Value,
 			Ismain: true,
 			Content: content,
@@ -166,6 +168,7 @@ func (p *Parser) parseStart() ASTNode {
 
 		}else{
 		return Function{
+
 			Name:    funcname.Value,
 			Content: content,
 			Line:    line,
@@ -318,7 +321,6 @@ func (p *Parser) parser(minBp int) ASTNode {
 
 	for {
 		value, ok := bpmap[p.current.Type]
-		fmt.Println(value)
 		if ok && value >minBp {
 
 			op := p.current

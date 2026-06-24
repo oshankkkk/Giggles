@@ -40,7 +40,7 @@ func readscript(path string){
 		if err=code.Fixpatchs();err!=nil{
 			fmt.Println(err)
 		}
-//		compiler.Disassemble(code.Buff,code.CounterTable)
+		compiler.Disassemble(code.Buff,code.CounterTable)
 		//bytearray,constTable,vartable:=compiler.(bytecodelist)	
 		ans := vm.Machine(code.Buff,code.CounterTable)
 		fmt.Println(ans)

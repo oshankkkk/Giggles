@@ -44,6 +44,7 @@ func (o Opcode) String() string {
 
 // Disassemble prints out the compiled bytecode in a human-readable format.
 func Disassemble(bytearray []byte, counterTable []int) {
+	fmt.Println(len(bytearray),"bytearray")
 	fmt.Println("=== BYTECODE DISASSEMBLY ===")
 	
 	for pc := 0; pc < len(bytearray); {

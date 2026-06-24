@@ -10,20 +10,19 @@ import (
 )
 type State struct {
 	CounterTable  []int
-	symboltb map[string]int
 	fixups []fixup
 	Entrypoint int
 	Buff []byte
 }
-type fixup struct{
-	address int
-	funname string
-}
+
 func (c *State) Wrapper(ast parser.ASTNode,scope *Scope){
-	c.symboltb=make(map[string]int)
 	c.Buff = append(c.Buff, byte(JMP),0)	
 	c.ToBytes(ast,scope)
 	c.Buff[1]=byte(c.Entrypoint)
+	if err:=c.Fixpatchs();err!=nil{
+	panic(err)
+}
+	
 }
 func (c *State) ToBytes(ast parser.ASTNode, scope *Scope) {
 	if value, ok := ast.(parser.Program); ok {
@@ -39,64 +38,65 @@ func (c *State) ToBytes(ast parser.ASTNode, scope *Scope) {
 	}
 	if value, ok := ast.(parser.VarDecl); ok {
 		c.ToBytes(value.Value, scope)
-		v := scope.AddVariable(value.Name.Value)
-		c.CounterTable = append(c.CounterTable, v.id)
-		c.Buff = append(c.Buff, byte(SETGLOBAL), byte(len(c.CounterTable)-1))
+		value.Address=len(c.Buff)
+		scope.AddSymbol(value)
+
+		if !value.IsLocal{
+			c.CounterTable = append(c.CounterTable, value.Address)
+			c.Buff = append(c.Buff, byte(SETGLOBAL), byte(len(c.CounterTable)-1))
+
+		}
 	}
 	if value, ok := ast.(parser.Identifier); ok {
+
 		if info, ok := scope.VarLookup(value.Name.Value); ok {
-			c.CounterTable = append(c.CounterTable, info.id)
+			c.CounterTable = append(c.CounterTable, info.GetAddress())
 			c.Buff = append(c.Buff, byte(GETGLOBAL), byte(len(c.CounterTable)-1))
 		} else {
 			panic("var undefined")
 		}
 	}
-//	if value, ok := ast.(parser.Call); ok {
-//		fmt.Println("function call",value.Function)
-//		c.Buff = append(c.Buff, byte(NWFRM))
-//		funcjmp := len(c.Buff) + 1
-//		c.Buff = append(c.Buff, byte(JMP), 0)
-//		if fnaddress, ok := c.symboltb[value.Function]; ok {
-//			c.CounterTable = append(c.CounterTable, fnaddress)
-//			c.Buff[funcjmp] = byte(len(c.CounterTable) - 1)
-//		} else {
-//			c.fixups = append(c.fixups, fixup{address: funcjmp, funname: value.Function})
-//		}
-//	}
 	if value, ok := ast.(parser.Call); ok {
-    c.Buff = append(c.Buff, byte(NWFRM))
-    
-    // Push return address (instruction after the JMP)
-    returnAddr := len(c.Buff) + 4 // address of instruction after JMP+operand
-    c.CounterTable = append(c.CounterTable, returnAddr)
-    c.Buff = append(c.Buff, byte(PUSH), byte(len(c.CounterTable)-1))
-    
-    funcjmp := len(c.Buff) + 1
-    c.Buff = append(c.Buff, byte(JMP), 0)
-    if fnaddress, ok := c.symboltb[value.Function]; ok {
-        c.CounterTable = append(c.CounterTable, fnaddress)
-        c.Buff[funcjmp] = byte(len(c.CounterTable) - 1)
-    } else {
-        c.fixups = append(c.fixups, fixup{address: funcjmp, funname: value.Function})
-    }
-}
+		c.Buff = append(c.Buff, byte(NWFRM))
+		// Push return address (instruction after the JMP)
+		returnAddr := len(c.Buff) + 4 // address of instruction after JMP+operand
+		c.CounterTable = append(c.CounterTable, returnAddr)
+		c.Buff = append(c.Buff, byte(PUSH), byte(len(c.CounterTable)-1))
+		fmt.Println("pushing",len(c.Buff)+5 )
+		funcjmp := len(c.Buff) + 1
+		c.Buff = append(c.Buff, byte(JMP), 0)
+		if function, ok := scope.VarLookup(value.Function); ok {
+			c.CounterTable = append(c.CounterTable,function.GetAddress())
+			fmt.Println(function.GetAddress(),"<-- address in foo")
+			fmt.Println(c.CounterTable,"this is the CounterTable")
+			c.Buff[funcjmp] = byte(len(c.CounterTable) - 1)
+		} else {
+
+			fmt.Println(c.CounterTable,"this is the CounterTable")
+			c.fixups = append(c.fixups, fixup{address: funcjmp, funname: value.Function, scopeNode: scope})
+		}
+	}
 	if value, ok := ast.(parser.Function); ok {
 		if value.Ismain{
 			c.Entrypoint = len(c.CounterTable)
 			c.CounterTable = append(c.CounterTable, len(c.Buff))
 			c.Buff = append(c.Buff, byte(NWFRM))
+				for _, n := range value.Content {
+			c.ToBytes(n,scope)
 		}
-		c.symboltb[value.Name] = len(c.Buff)
-		for _, n := range value.Content {
-			c.ToBytes(n, scope)
-		}
-		if value.Ismain{
 			c.Buff= append(c.Buff, byte(STOP))
 		}else{
-			fmt.Println("rm on co pilerrrrrr")
-			c.Buff = append(c.Buff, byte(RMFRM))
+		value.Address=len(c.Buff)
+		fmt.Println("address of foo",value.Address)
+		scope.AddSymbol(value)
+		local:=EnterScope(scope)
+		//c.symboltb[value.Name] = len(c.Buff)
+		for _, n := range value.Content {
+			c.ToBytes(n,local)
 		}
-	}
+
+		c.Buff = append(c.Buff, byte(RMFRM))
+	} }
 	if value, ok := ast.(parser.Condition); ok {
 		condPos := len(c.Buff)
 		c.ToBytes(value.Condition, scope)
@@ -159,8 +159,8 @@ func (c *State) ToBytes(ast parser.ASTNode, scope *Scope) {
 	if value, ok := ast.(parser.Binary); ok {
 		if value.Operator == lexer.EQUAL {
 			c.ToBytes(value.Right, scope)
-			if info, ok := scope.VarLookup(value.Left.(parser.Identifier).Name.Value); ok {
-				c.CounterTable = append(c.CounterTable, info.id)
+			if variable, ok := scope.VarLookup(value.Left.(parser.Identifier).Name.Value); ok {
+				c.CounterTable = append(c.CounterTable, variable.GetAddress())
 				c.Buff = append(c.Buff, byte(ASS), byte(len(c.CounterTable)-1))
 			} else {
 				panic("var undefined")
@@ -197,50 +197,34 @@ func (c *State) ToBytes(ast parser.ASTNode, scope *Scope) {
 			opcode = NEQ
 		}
 		c.Buff = append(c.Buff, byte(opcode))
+		//fmt.Println(len(c.Buff)-1,"add address")
 	}
 }
-func (c *State) Fixpatchs()(error){
-	// After the whole program is compiled, resolve all fixups
 
+type fixup struct{
+	address int
+	funname string
+	scopeNode *Scope
+}
+func (c *State) Fixpatchs()error{
+	// After the whole program is compiled, resolve all fixups
 	for _, f := range c.fixups {
-		addr, ok := c.symboltb[f.funname]
+		symbol, ok := f.scopeNode.VarLookup(f.funname)
 		if !ok {
 			return fmt.Errorf("undefined function: %s", f.funname)
 		}
+		c.CounterTable = append(c.CounterTable, symbol.GetAddress())
 
-		// Write the real address into the 2-byte placeholder
-		// Adjust encoding to match your VM's word size / endianness
-		//c.Buff[f.address]   = byte(addr)   // high byte
-		c.CounterTable = append(c.CounterTable, addr)
+			fmt.Println(c.CounterTable,"this is the CounterTable")
 		c.Buff[f.address] =byte(len(c.CounterTable)-1)
-
-		//c.Buff[f.patchOffset+1] = byte(addr & 0xFF) // low byte
+				fmt.Println("f address",f.address)
 	}
 	return nil
 
 }
 
+// Write the real address into the 2-byte placeholder
+// Adjust encoding to match your VM's word size / endianness
+//c.Buff[f.address]   = byte(addr)   // high byte
 
-//		if value.IsLocal{
-//			c.Buff = append(c.Buff, byte(SETLOCAL))
-//			fmt.Println("heheh")
-//		}else{
-
-//	if value, ok:=ast.(parser.Call);ok{
-//		c.Buff = append(c.Buff, byte(CALLFUNC))
-//	}
-//	if value, ok:=ast.(parser.Function);ok{
-		//local :=EnterScope(scope)
-		//start:=len(c.Buff)
-		//framestart:=len(c.Buff)
-		//c.Buff = append(c.Buff,byte( ENTERFUNC))
-	//	for _,stmnt:=range value.Content{
-		//c.Buff = append(c.Buff, c.ToBytes(stmnt,scope)...)
-		//	}
-			//end:=len(c.Buff)
-		//c.CounterTable=append(c.CounterTable,end )	
-		//fmt.Println(framestart,"dddrfff")
-		//fmt.Println(len(c.CounterTable)-2,"ffffffff")
-
-		//c.Buff = append(c.Buff, byte(JMP), byte(len(c.CounterTable)-2))
-	//}
+//c.Buff[f.patchOffset+1] = byte(addr & 0xFF) // low byte

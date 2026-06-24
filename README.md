@@ -7,9 +7,10 @@
 - [x] if-then syntax sugar with end
 - [x] make all variables cons by default
 - [x] make all var global by default
-- [ ] func support
+-[ ]arg support 
+- [ ] return values
 - [ ] local keyword for local vars
-- [ ] scope handling
+- [x] scope handling
 
 
 ## A toy interpreter 

@@ -1,36 +1,30 @@
+
 package compiler
-import "fmt"
-type Variable struct {
-	id int
-	Name  string
-	//Type 
-}
+
+import (
+	"lang/internal/parser"
+)
 
 type Scope struct {
 	Parent *Scope
-	locals map[string]Variable
-	varcounter int
-	//startpointer int
+	localsymbols map[string]parser.Symbols
+
 }
 
-// InitScope creates a brand new root scope (no parent)
 func InitScope() *Scope {
 	return &Scope{
 		Parent: nil,
-		locals: make(map[string]Variable),
-		//startpointer: 0,
+		localsymbols: make(map[string]parser.Symbols),
 	}
 }
 
-// EnterScope creates a child scope — call this when entering a block/function
 func EnterScope(parent *Scope,) *Scope {
 	return &Scope{
 		Parent: parent,
-		locals: make(map[string]Variable),
+		localsymbols: make(map[string]parser.Symbols),
 	}
 }
 
-// LeaveScope returns the parent scope — call this when exiting a block/function
 func (s *Scope) LeaveScope() *Scope {
 	if s.Parent == nil {
 		panic("cannot leave the global scope")
@@ -38,30 +32,22 @@ func (s *Scope) LeaveScope() *Scope {
 	return s.Parent
 }
 
-// AddVariable defines a variable in the CURRENT scope only
-func (s *Scope) AddVariable(name string)Variable {
-	
-	v:= Variable{Name: name, id: s.varcounter}
+func (s *Scope) AddSymbol(symbol parser.Symbols) {
+	name:=symbol.GetName()
+//	fmt.Println(symbol.GetName(),"this is the function name" )
+    s.localsymbols[name] = symbol
 
-	s.locals[name] =v
-	fmt.Println("idid",s.varcounter)
-
-	s.varcounter++
-	return  v
 }
-
-// VarLookup walks up the scope chain to find a variable by name
-func (s *Scope) VarLookup(name string) (Variable, bool) {
-	// Check current scope first
-	if v, ok := s.locals[name]; ok {
+//for identifier to check if symbol are parsed
+func (s *Scope) VarLookup(name string) (parser.Symbols, bool) {
+	if v, ok := s.localsymbols[name]; ok {
 		return v, true
 	}
-	// Not here — ask the parent (this is the key recursive step)
-	if s.Parent != nil {
-		return s.Parent.VarLookup(name)
-	}
-	// Reached the root and still not found
-	return Variable{}, false
+//
+//	if s.Parent != nil {
+//		return s.Parent.VarLookup(name)
+//	}
+	return nil, false
 }
 
 

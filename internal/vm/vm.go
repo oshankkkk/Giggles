@@ -48,40 +48,18 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			g.stackpointer++
 			g.programCounter++
 		case compiler.NWFRM:
-			// Layout: [saved_bp][return_addr] then locals above BP
 			g.stack[g.stackpointer] = g.basepointer
 			g.stackpointer++
 			g.basepointer = g.stackpointer
 			g.programCounter++
 
 		case compiler.RMFRM:
-			// Grab return address pushed just after NWFRM
 			retAddr := g.stack[g.basepointer] 
-			g.stackpointer = g.basepointer - 1  // unwind locals + saved bp slot
-			g.basepointer = g.stack[g.basepointer-1] // restore caller's BP
+			g.stackpointer = g.basepointer - 1  
+			g.basepointer = g.stack[g.basepointer-1]
 			g.programCounter = retAddr           
-//		case compiler.NWFRM:
-//			fmt.Println("newframe happends",g.stackpointer)
-//			g.stack[g.stackpointer]=g.basepointer
-//			g.stackpointer++
-//			g.basepointer=g.stackpointer
-//			g.programCounter++
-//			g.debugStack("new stack op")
-//		case compiler.RMFRM:
-//			fmt.Println("rmstack happend befor rm",g.stackpointer,g.basepointer)
-//			g.stackpointer=g.basepointer
-//
-//			fmt.Println("after same as basepointer",g.stackpointer,g.basepointer)
-//			g.stackpointer--
-//
-//			fmt.Println("after -1 deduct from stackpointer",g.stackpointer,g.basepointer)
-//			//fmt.Println(g.stackpointer)
-//			g.basepointer=g.stack[g.stackpointer]
-//			fmt.Println("after stack base value interchange",g.stackpointer,g.basepointer)
-//			g.programCounter++
-			//g.stackpointer=g.stack[g.basepointer]
-			//g.basepointer=g.stackpointer
-			//g.debugStack("remove stack op")
+			fmt.Println("retAddr",retAddr,"pcounter",g.programCounter)
+//			g.debugStack("RMFRM opcode")
 		case compiler.SETGLOBAL:
 			g.programCounter++  // move past opcode to read the index
 			idx := counterTable[int(bytearray[g.programCounter])]
@@ -93,8 +71,6 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			g.globalscope[idx] = g.stack[g.stackpointer]
 			g.programCounter++
 		case compiler.GETGLOBAL:
-			// the values in the counter table should be the index of the global var
-			//pcounter is its index
 			g.programCounter++
 			g.stack[g.stackpointer]=g.globalscope[counterTable[int(bytearray[g.programCounter])]]
 			g.stackpointer++
@@ -133,6 +109,8 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			}
 		case compiler.ADD, compiler.SUB, compiler.MUL, compiler.DIV:
 			ans=g.MathOps(opcode)
+
+		fmt.Println("add happends answer is ",ans)
 		case compiler.GT, compiler.LT, compiler.GTE, compiler.LTE, compiler.EQ:
 			ans=g.Comparisons(opcode)
 		case compiler.AND, compiler.OR, compiler.TRUE, compiler.FALSE:
@@ -145,9 +123,11 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			//			g.stackpointer=g.framepointer
 			//
 		}
+
+//	fmt.Println("programCounter",g.programCounter)
 	}
 
-	fmt.Println(g.stack)
+	//fmt.Println(g.stack)
 	return ans
 }
 
@@ -157,7 +137,6 @@ func (g *GVM) MathOps(opcode int) int{
 	switch compiler.Opcode(opcode) {
 	case compiler.ADD:
 		g.stackpointer--
-		fmt.Println("add happends ")
 		left := g.stack[g.stackpointer]
 		g.stackpointer--
 		right := g.stack[g.stackpointer]
