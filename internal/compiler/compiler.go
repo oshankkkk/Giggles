@@ -13,9 +13,13 @@ type State struct {
 	fixups []fixup
 	Entrypoint int
 	Buff []byte
+	globals map[string]parser.VarDecl
+	//globals []parser.VarDecl
+
 }
 
 func (c *State) Wrapper(ast parser.ASTNode,scope *Scope){
+	c.globals=make(map[string]parser.VarDecl)
 	c.Buff = append(c.Buff, byte(JMP),0)	
 	c.ToBytes(ast,scope)
 	c.Buff[1]=byte(c.Entrypoint)
@@ -38,21 +42,27 @@ func (c *State) ToBytes(ast parser.ASTNode, scope *Scope) {
 	}
 	if value, ok := ast.(parser.VarDecl); ok {
 		c.ToBytes(value.Value, scope)
+
 		value.Address=len(c.Buff)
-		scope.AddSymbol(value)
-
+		c.CounterTable = append(c.CounterTable, value.Address)
 		if !value.IsLocal{
-			c.CounterTable = append(c.CounterTable, value.Address)
+			c.globals[value.GetName()]=value
+			//the address of the push
 			c.Buff = append(c.Buff, byte(SETGLOBAL), byte(len(c.CounterTable)-1))
-
-		}
+		}else{
+			scope.AddSymbol(value)
+			//c.Buff = append(c.Buff, byte(SETLOCAL), byte(len(c.CounterTable)-1))
+		} 
 	}
 	if value, ok := ast.(parser.Identifier); ok {
-
 		if info, ok := scope.VarLookup(value.Name.Value); ok {
-			c.CounterTable = append(c.CounterTable, info.GetAddress())
+				//the address of the push
+			c.CounterTable = append(c.CounterTable,info.GetAddress())
+			c.Buff = append(c.Buff, byte(GETLOCAL), byte(len(c.CounterTable)-1))
+		}else if value,ok:=c.globals[value.Name.Value];ok{
+			c.CounterTable = append(c.CounterTable, value.GetAddress())
 			c.Buff = append(c.Buff, byte(GETGLOBAL), byte(len(c.CounterTable)-1))
-		} else {
+		}else {
 			panic("var undefined")
 		}
 	}

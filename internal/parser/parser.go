@@ -61,7 +61,7 @@ func (p *Parser)programparser() ASTNode {
 }
 
 func (p *Parser)statementparser() ASTNode {
-	if p.current.Type== lexer.TYPEDEFF{
+	if p.current.Type== lexer.TYPEDEFF || p.current.Type==lexer.LOCAL{
 		return p.vardecparser()
 	}
 	return p.expstatement()
@@ -83,6 +83,7 @@ func (p *Parser)vardecparser() ASTNode{
 	if scope.Type==lexer.LOCAL{
 		isLocal = true 
 		typedeff=p.nextToken()
+		fmt.Println("skipipipi")
 	}else{
 		typedeff=scope
 	}
@@ -215,6 +216,7 @@ func (p *Parser) parseStart() ASTNode {
 		}
 	}
 	if p.current.Type == lexer.ILLEGAL{
+		fmt.Println("ILLEGAL hambuna")
 		panic(fmt.Sprintf("expected '%s' at Line %d", p.current.Value,p.current.Line))
 	}
 
@@ -313,6 +315,7 @@ func (p *Parser) parseStart() ASTNode {
 			Column: op.Column,
 		}
 	}
+//	fmt.Println("at the end thatma local awula")
 	panic(fmt.Sprintf("unexpected token: %s at line %d column %d", p.current.Type, p.current.Line, p.current.Column))
 }
 

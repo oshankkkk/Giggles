@@ -49,5 +49,17 @@ func (s *Scope) VarLookup(name string) (parser.Symbols, bool) {
 //	}
 	return nil, false
 }
+func (s *Scope) GlobalVarLookup(name string) (parser.Symbols, bool) {
+	if v, ok := s.localsymbols[name]; ok {
+		return v, true
+	}
+
+	if s.Parent != nil {
+		return s.Parent.VarLookup(name)
+	}
+
+	return nil, false
+}
+
 
 

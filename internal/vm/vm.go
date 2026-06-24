@@ -52,7 +52,6 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			g.stackpointer++
 			g.basepointer = g.stackpointer
 			g.programCounter++
-
 		case compiler.RMFRM:
 			retAddr := g.stack[g.basepointer] 
 			g.stackpointer = g.basepointer - 1  
@@ -60,6 +59,17 @@ func (g *GVM) Machine(bytearray []byte, counterTable []int) int {
 			g.programCounter = retAddr           
 			fmt.Println("retAddr",retAddr,"pcounter",g.programCounter)
 //			g.debugStack("RMFRM opcode")
+
+//		case compiler.SETLOCAL:
+//			g.programCounter++  // move past opcode to read the index
+//			g.stackpointer--
+		case compiler.GETLOCAL:
+			g.programCounter++
+			idx := counterTable[int(bytearray[g.programCounter])]
+			localvalue:=int(bytearray[idx])
+			g.stack[g.stackpointer]=localvalue
+			g.stackpointer++
+			g.programCounter++
 		case compiler.SETGLOBAL:
 			g.programCounter++  // move past opcode to read the index
 			idx := counterTable[int(bytearray[g.programCounter])]

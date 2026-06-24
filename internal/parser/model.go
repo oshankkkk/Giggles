@@ -8,6 +8,7 @@ type ASTNode interface {
 type Symbols interface{
 	GetName()string
 	GetAddress()int
+
 }
 type Program struct {
 	Statements []ASTNode
@@ -108,10 +109,10 @@ func (f Function) GetName() string {
 func (n VarDecl) GetAddress() int {
 	return n.Address
 }
-
 func (n Function) GetAddress() int {
 	return n.Address
 }
+
 func (n ExprStatement) Expression() {}
 func (n Call) Expression() {}
 
