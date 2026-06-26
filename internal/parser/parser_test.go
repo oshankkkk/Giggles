@@ -168,3 +168,55 @@ func TestParseCallWithArgs(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, "3", arg1.Value.Value)
 }
+
+func TestParseFunctionWithReturnType(t *testing.T) {
+	// fn foo(int a, int b)int — return type on same line as declaration
+	l := &lexer.Lexer{}
+	l.ReadLine("fn foo(int a, int b)int\nreturn 2\nend")
+	p := &Parser{}
+
+	ast := p.Run(l)
+	prog, ok := ast.(Program)
+	assert.True(t, ok)
+
+	exprStmt, ok := prog.Statements[0].(ExprStatement)
+	assert.True(t, ok)
+
+	fn, ok := exprStmt.Expr.(Function)
+	assert.True(t, ok)
+	assert.Equal(t, "foo", fn.Name)
+	assert.Equal(t, "int", fn.ReturnType)
+	assert.False(t, fn.IsVoid)
+	assert.Len(t, fn.Params, 2)
+	assert.Len(t, fn.Content, 1)
+
+	ret, ok := fn.Content[0].(ReturnStmt)
+	assert.True(t, ok)
+
+	lit, ok := ret.Value.(Literal)
+	assert.True(t, ok)
+	assert.Equal(t, "2", lit.Value.Value)
+}
+
+func TestParseFunctionVoidReturn(t *testing.T) {
+	// fn with no return type — IsVoid should be true, bare return produces ReturnStmt{Value:nil}
+	l := &lexer.Lexer{}
+	l.ReadLine("fn greet\nreturn\nend")
+	p := &Parser{}
+
+	ast := p.Run(l)
+	prog, ok := ast.(Program)
+	assert.True(t, ok)
+
+	exprStmt, ok := prog.Statements[0].(ExprStatement)
+	assert.True(t, ok)
+
+	fn, ok := exprStmt.Expr.(Function)
+	assert.True(t, ok)
+	assert.Equal(t, "", fn.ReturnType)
+	assert.True(t, fn.IsVoid)
+
+	ret, ok := fn.Content[0].(ReturnStmt)
+	assert.True(t, ok)
+	assert.Nil(t, ret.Value)
+}

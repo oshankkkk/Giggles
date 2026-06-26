@@ -86,15 +86,22 @@ type Param struct {
 	Column   int
 }
 
-type Function struct{
-	Address int
-	Name    string
-	Ismain  bool
-	Params  []Param
-	Content []ASTNode
-	Line    int
-	Column  int
-	isVoid  bool
+type ReturnStmt struct {
+	Value  ASTNode // nil for bare `return` (void)
+	Line   int
+	Column int
+}
+
+type Function struct {
+	Address    int
+	Name       string
+	Ismain     bool
+	Params     []Param
+	ReturnType string 
+	IsVoid     bool
+	Content    []ASTNode
+	Line       int
+	Column     int
 }
 type Condition struct{
 	Condition ASTNode
@@ -110,7 +117,8 @@ func (n Program) Expression()       {}
 func (n Literal) Expression()       {}
 func (n Identifier) Expression()    {}
 func (n Binary) Expression()        {}
-func (n Function) Expression()        {}
+func (n Function) Expression()     {}
+func (n ReturnStmt) Expression()   {}
 func (n Unary) Expression()         {}
 func (n Groups) Expression()        {}
 func (n Param) Expression()        {}

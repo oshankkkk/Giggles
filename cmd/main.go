@@ -113,7 +113,9 @@ func prettyprinter(ex parser.ASTNode, indent int) {
 	case parser.Arg:
 		fmt.Printf("%sArg\n", pad)
 		prettyprinter(n.Value,indent+1)
-		
+	case parser.ReturnStmt:
+		fmt.Printf("%sReturn\n", pad)
+		prettyprinter(n.Value,indent+1)
 
 
 	default:

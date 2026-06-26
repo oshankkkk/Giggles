@@ -60,12 +60,33 @@ func (p *Parser)programparser() ASTNode {
 	return Program{Statements: statements}
 }
 
-func (p *Parser)statementparser() ASTNode {
-	if p.current.Type== lexer.TYPEDEFF || p.current.Type==lexer.LOCAL{
+func (p *Parser) statementparser() ASTNode {
+	if p.current.Type == lexer.TYPEDEFF || p.current.Type == lexer.LOCAL {
 		return p.vardecparser()
+	}
+	if p.current.Type == lexer.RETURN {
+		return p.returnparser()
 	}
 	return p.expstatement()
 }
+
+func (p *Parser) returnparser() ASTNode {
+	tok := p.nextToken() // consume 'return', tok = RETURN token
+	// If the next token can start an expression, parse it.
+	// Otherwise treat it as a bare `return` (void).
+	var val ASTNode
+	if p.current.Type != lexer.END &&
+		p.current.Type != lexer.ELSE &&
+		p.current.Type != lexer.EOF {
+		val = p.parser(0)
+	}
+	return ReturnStmt{
+		Value:  val,
+		Line:   tok.Line,
+		Column: tok.Column,
+	}
+}
+
 
 func (p *Parser)expstatement() ASTNode {
 	expr := p.parser(0)
@@ -146,28 +167,26 @@ func (p *Parser) parseStart() ASTNode {
 	if p.current.Type == lexer.FN {
 
 		p.idcounter++
-		token := p.nextToken() 
+		token := p.nextToken() // consume 'fn', token = FN
 
 		line := token.Line
 		col := token.Column
-		funcname := p.nextToken() 
+		funcname := p.nextToken() // consume function name
 
+		// --- parse optional parameter list: fn foo(int x, bool y) ---
 		var params []Param
 		if p.current.Type == lexer.LEFT_PAREN {
 			p.nextToken() // consume '('
 			for p.current.Type != lexer.RIGHT_PAREN {
 				if p.current.Type != lexer.TYPEDEFF {
-					fmt.Println("ehehe")
 					panic(fmt.Sprintf("expected type in parameter list but found '%s' at line %d", p.current.Value, p.current.Line))
 				}
-				//type take
-				paramType := p.nextToken() 
+				paramType := p.nextToken() // consume type keyword (e.g. 'int')
 
 				if p.current.Type != lexer.IDENTIFIER {
-					fmt.Println("here or there")
 					panic(fmt.Sprintf("expected parameter name but found '%s' at line %d", p.current.Value, p.current.Line))
 				}
-				paramName := p.nextToken() 
+				paramName := p.nextToken() // consume parameter name
 
 				params = append(params, Param{
 					Typedeff: paramType.Value,
@@ -177,13 +196,26 @@ func (p *Parser) parseStart() ASTNode {
 				})
 
 				if p.current.Type == lexer.COMMA {
-					p.nextToken() 
-					//comma
+					p.nextToken() // consume ',' between parameters
 				}
 			}
 			p.nextToken() // consume ')'
 		}
-		//put to the symbols to use in the body
+		// --- end parameter list ---
+
+		// --- parse optional return type: fn foo(int x) int ---
+		// The return type must appear on the SAME LINE as the fn declaration
+		// to avoid consuming the first statement of the body (e.g. `int z = ...`).
+		var returnType string
+		isVoid := true
+		if p.current.Type == lexer.TYPEDEFF && p.current.Line == funcname.Line {
+			returnType = p.nextToken().Value // consume the return type token
+			isVoid = false
+		}
+		// --- end return type ---
+
+
+		// Register params in the symbol table so the body can reference them.
 		for _, param := range params {
 			p.symboltb[param.Name.Value] = false
 		}
@@ -205,22 +237,27 @@ func (p *Parser) parseStart() ASTNode {
 
 		if funcname.Type == lexer.MAIN {
 			return Function{
-				Name:    funcname.Value,
-				Ismain:  true,
-				Params:  params,
-				Content: content,
-				Line:    line,
-				Column:  col,
+				Name:       funcname.Value,
+				Ismain:     true,
+				Params:     params,
+				ReturnType: returnType,
+				IsVoid:     isVoid,
+				Content:    content,
+				Line:       line,
+				Column:     col,
 			}
 		}
 		return Function{
-			Name:    funcname.Value,
-			Params:  params,
-			Content: content,
-			Line:    line,
-			Column:  col,
+			Name:       funcname.Value,
+			Params:     params,
+			ReturnType: returnType,
+			IsVoid:     isVoid,
+			Content:    content,
+			Line:       line,
+			Column:     col,
 		}
 	}
+
 
 	if p.current.Type == lexer.IDENTIFIER || p.current.Type==lexer.MAIN {
 		name := p.current
