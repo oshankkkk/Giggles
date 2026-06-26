@@ -72,14 +72,23 @@ type VarDecl struct {
 }
 
 
+// Param represents a single typed function parameter, e.g. "int x".
+type Param struct {
+	Typedeff string
+	Name     lexer.Token
+	Line     int
+	Column   int
+}
+
 type Function struct{
 	Address int
-	Name string
-	Ismain bool
+	Name    string
+	Ismain  bool
+	Params  []Param
 	Content []ASTNode
-	Line   int
-	Column int
-	isVoid bool
+	Line    int
+	Column  int
+	isVoid  bool
 }
 type Condition struct{
 	Condition ASTNode

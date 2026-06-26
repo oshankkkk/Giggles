@@ -146,10 +146,48 @@ func (p *Parser) parseStart() ASTNode {
 	if p.current.Type == lexer.FN {
 
 		p.idcounter++
-		token := p.nextToken()
+		token := p.nextToken() 
+
 		line := token.Line
 		col := token.Column
-		funcname := p.nextToken()
+		funcname := p.nextToken() 
+
+		var params []Param
+		if p.current.Type == lexer.LEFT_PAREN {
+			p.nextToken() // consume '('
+			for p.current.Type != lexer.RIGHT_PAREN {
+				if p.current.Type != lexer.TYPEDEFF {
+					fmt.Println("ehehe")
+					panic(fmt.Sprintf("expected type in parameter list but found '%s' at line %d", p.current.Value, p.current.Line))
+				}
+				//type take
+				paramType := p.nextToken() 
+
+				if p.current.Type != lexer.IDENTIFIER {
+					fmt.Println("here or there")
+					panic(fmt.Sprintf("expected parameter name but found '%s' at line %d", p.current.Value, p.current.Line))
+				}
+				paramName := p.nextToken() 
+
+				params = append(params, Param{
+					Typedeff: paramType.Value,
+					Name:     paramName,
+					Line:     paramName.Line,
+					Column:   paramName.Column,
+				})
+
+				if p.current.Type == lexer.COMMA {
+					p.nextToken() 
+					//comma
+				}
+			}
+			p.nextToken() // consume ')'
+		}
+		//put to the symbols to use in the body
+		for _, param := range params {
+			p.symboltb[param.Name.Value] = false
+		}
+
 		var content []ASTNode
 		for p.current.Type != lexer.END {
 			content = append(content, p.statementparser())
@@ -159,25 +197,29 @@ func (p *Parser) parseStart() ASTNode {
 		} else {
 			panic(fmt.Sprintf("expected 'end' for fn block at Line %d", token.Line))
 		}
-		if funcname.Type==lexer.MAIN{
+
+		// Clean up params from symbol table — they are scoped to this function.
+		for _, param := range params {
+			delete(p.symboltb, param.Name.Value)
+		}
+
+		if funcname.Type == lexer.MAIN {
 			return Function{
-
-			Name:    funcname.Value,
-			Ismain: true,
-			Content: content,
-			Line:    line,
-			Column:  col,
+				Name:    funcname.Value,
+				Ismain:  true,
+				Params:  params,
+				Content: content,
+				Line:    line,
+				Column:  col,
+			}
 		}
-
-		}else{
 		return Function{
-
 			Name:    funcname.Value,
+			Params:  params,
 			Content: content,
 			Line:    line,
 			Column:  col,
 		}
-}
 	}
 
 	if p.current.Type == lexer.IDENTIFIER || p.current.Type==lexer.MAIN {
