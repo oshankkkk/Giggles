@@ -139,3 +139,32 @@ func TestParseFunctionParamsUsedInBody(t *testing.T) {
 	assert.Len(t, fn.Params, 2)
 	assert.Len(t, fn.Content, 1) // one statement: int z = x + y
 }
+
+func TestParseCallWithArgs(t *testing.T) {
+	// Declare a function first so the symbol table knows about it,
+	// then call it with two numeric arguments.
+	l := &lexer.Lexer{}
+	l.ReadLine("fn add(int x, int y)\nend\nadd(2, 3)")
+	p := &Parser{}
+
+	ast := p.Run(l)
+	prog, ok := ast.(Program)
+	assert.True(t, ok)
+	assert.Len(t, prog.Statements, 2) // fn decl + call expression
+
+	callStmt, ok := prog.Statements[1].(ExprStatement)
+	assert.True(t, ok)
+
+	call, ok := callStmt.Expr.(Call)
+	assert.True(t, ok)
+	assert.Equal(t, "add", call.Function)
+	assert.Len(t, call.Args, 2)
+
+	arg0, ok := call.Args[0].Value.(Literal)
+	assert.True(t, ok)
+	assert.Equal(t, "2", arg0.Value.Value)
+
+	arg1, ok := call.Args[1].Value.(Literal)
+	assert.True(t, ok)
+	assert.Equal(t, "3", arg1.Value.Value)
+}

@@ -14,12 +14,19 @@ type Program struct {
 	Statements []ASTNode
 }
 
+type Arg struct {
+	Value  ASTNode
+	Line   int
+	Column int
+}
+
 type Call struct {
 	Function string
-	Args     []ASTNode
+	Args     []Arg
 	Line     int
 	Column   int
 }
+
 
 type Literal struct {
 	Value    lexer.Token
@@ -72,7 +79,6 @@ type VarDecl struct {
 }
 
 
-// Param represents a single typed function parameter, e.g. "int x".
 type Param struct {
 	Typedeff string
 	Name     lexer.Token
@@ -107,6 +113,8 @@ func (n Binary) Expression()        {}
 func (n Function) Expression()        {}
 func (n Unary) Expression()         {}
 func (n Groups) Expression()        {}
+func (n Param) Expression()        {}
+func (n Arg) Expression()        {}
 func (n Condition) Expression()     {}
 func (n VarDecl) Expression()       {}
 func (v VarDecl) GetName() string {

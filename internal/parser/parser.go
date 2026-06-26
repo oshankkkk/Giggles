@@ -226,17 +226,23 @@ func (p *Parser) parseStart() ASTNode {
 		name := p.current
 		p.nextToken()
 
-		// function call: identifier followed by '('
 		if p.current.Type == lexer.LEFT_PAREN {
-			p.nextToken() // consume '('
-			var args []ASTNode
+			p.nextToken() 
+			var args []Arg
 			for p.current.Type != lexer.RIGHT_PAREN {
-				args = append(args, p.parser(0))
+				argLine := p.current.Line
+				argCol := p.current.Column
+				expr := p.parser(0)
+				args = append(args, Arg{
+					Value:  expr,
+					Line:   argLine,
+					Column: argCol,
+				})
 				if p.current.Type == lexer.COMMA {
-					p.nextToken() // consume ',' between args
+					p.nextToken() 
 				}
 			}
-			p.nextToken() // consume ')'
+			p.nextToken() 
 			return Call{
 				Function: name.Value,
 				Args:     args,
@@ -244,6 +250,7 @@ func (p *Parser) parseStart() ASTNode {
 				Column:   name.Column,
 			}
 		}
+
 
 		// plain identifier
 		value, ok := p.symboltb[name.Value]
